@@ -4,6 +4,17 @@ Windows 本机部署检查台 + ZIP 一键安装 + 七大企业业务场景。�
 
 **AI 工具从 [AGENTS.md](AGENTS.md) 开始，再读 [AI_CONTEXT.md](docs/AI_CONTEXT.md)。**
 
+## 下载入口
+
+| 下载内容 | 地址与用途 |
+| --- | --- |
+| 本项目代码 ZIP | [下载 main 分支](https://github.com/bsnwsmysbs/openclaw-deployment-kit/archive/refs/heads/main.zip)，需先登录有权限的 GitHub 账号 |
+| PowerShell 7 官方下载 | [微软 Windows 安装与下载页](https://learn.microsoft.com/zh-cn/powershell/scripting/install/installing-powershell-on-windows)，选择稳定版 Windows x64 MSI，并启用添加到 PATH |
+| PowerShell 官方发布页 | [PowerShell Releases](https://github.com/PowerShell/PowerShell/releases)，手动下载时选择稳定版的 `win-x64.msi`，跳过 Preview / RC |
+| 首次安装图文步骤 | [仓库安装说明](docs/DEPLOYMENT.md)；解压后也可双击 `deployment-check/public/powershell7.html` 查看独立网页指南 |
+
+新电脑先从这里安装 PowerShell 7，再解压本项目、双击 `deployment-check/start.cmd`。PowerShell 安装器由微软官方下载，不内置在本仓库 ZIP 中。
+
 ## 最快启动
 
 前提：Windows x64，已安装 PowerShell 7。检查台本身不依赖 Node.js。
