@@ -8,7 +8,7 @@ Windows 本机部署检查台 + ZIP 一键安装 + 七大企业业务场景。�
 
 | 下载内容 | 地址与用途 |
 | --- | --- |
-| 本项目代码 ZIP | [下载 main 分支](https://github.com/bsnwsmysbs/openclaw-deployment-kit/archive/refs/heads/main.zip)，需先登录有权限的 GitHub 账号 |
+| 本项目代码 ZIP | [下载 main 分支](https://github.com/bsnwsmysbs/openclaw-deployment-kit/archive/refs/heads/main.zip)，无需登录 GitHub |
 | PowerShell 7 官方下载 | [微软 Windows 安装与下载页](https://learn.microsoft.com/zh-cn/powershell/scripting/install/installing-powershell-on-windows)，选择稳定版 Windows x64 MSI，并启用添加到 PATH |
 | PowerShell 官方发布页 | [PowerShell Releases](https://github.com/PowerShell/PowerShell/releases)，手动下载时选择稳定版的 `win-x64.msi`，跳过 Preview / RC |
 | 首次安装图文步骤 | [仓库安装说明](docs/DEPLOYMENT.md)；解压后也可双击 `deployment-check/public/powershell7.html` 查看独立网页指南 |
@@ -33,7 +33,7 @@ cd openclaw-deployment-kit
 .\deployment-check\start.cmd
 ```
 
-私有仓库需先使用 GitHub 账号授权。也可以下载仓库 ZIP，解压后双击 `deployment-check/start.cmd`。
+仓库公开，可直接下载代码 ZIP，无需登录 GitHub 或安装 Git。解压后双击 `deployment-check/start.cmd`。
 
 浏览器会打开 <http://127.0.0.1:18890/>。关闭检查台启动窗口会停止网页服务。
 

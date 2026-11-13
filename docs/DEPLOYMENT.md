@@ -1,9 +1,9 @@
 # 新 Windows 电脑部署
 
-下载入口：[项目代码 ZIP](https://github.com/bsnwsmysbs/openclaw-deployment-kit/archive/refs/heads/main.zip)（需私有仓库权限） · [PowerShell 7 微软官方下载与安装说明](https://learn.microsoft.com/zh-cn/powershell/scripting/install/installing-powershell-on-windows) · [PowerShell 官方发布页](https://github.com/PowerShell/PowerShell/releases)。手动安装选择稳定版 Windows x64 MSI。
+下载入口：[项目代码 ZIP](https://github.com/bsnwsmysbs/openclaw-deployment-kit/archive/refs/heads/main.zip)（公开下载，无需登录） · [PowerShell 7 微软官方下载与安装说明](https://learn.microsoft.com/zh-cn/powershell/scripting/install/installing-powershell-on-windows) · [PowerShell 官方发布页](https://github.com/PowerShell/PowerShell/releases)。手动安装选择稳定版 Windows x64 MSI。
 
 1. 准备 PowerShell 7：尚未安装时先双击 `deployment-check/public/powershell7.html` 查看独立指南。在系统终端运行 `winget install --id Microsoft.PowerShell --exact --source winget`；安装后重新打开终端，执行 `pwsh --version` 确认 7.x。没有 winget 可按指南中的微软官方链接安装 x64 MSI。
-2. 获取私有仓库或完整仓库 ZIP，双击 `deployment-check/start.cmd`。
+2. 获取公开仓库或完整仓库 ZIP，双击 `deployment-check/start.cmd`。
 3. 填写新安装目录，运行自检。缺 Node 时安装系统 Node >= 24.16.0，确保 npm 可用，再关闭并重新启动检查台。
 4. 在已获取仓库的电脑运行 `pwsh -NoProfile -File scripts/build-package.ps1`，得到 `dist/OpenClawMeeting-Windows-0.3.0.zip`；将它传到目标电脑，网页选择该 ZIP。
 5. 填写可选 API Key，选择网关端口和是否安装业务场景，点击“解压并一键部署”。
