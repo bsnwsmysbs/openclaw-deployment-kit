@@ -12,6 +12,7 @@
 - 独立安装进程：`deployment-check/deploy-worker.ps1`。
 - 页面：`deployment-check/public/{index.html,app.js,deploy.js,style.css}`。
 - 可维护的 Windows 安装包源码：`packages/windows/`；不是本机已安装程序目录。
+- 网页默认自动选中此目录的轻量版，经 `POST /api/packages/bundled` 创建校验快照；用户不需要另下 ZIP。独立轻量版 ZIP/SHA256 发布到 GitHub Releases，与该目录一致。
 - 七大业务规则与模板：`packages/windows/preload/skills/`。
 - 客户运行环境助手规则：`packages/windows/preload/workspace/{AGENTS.md,SOUL.md,WORKSPACE_GUIDE.md}`。
 - 打包：`pwsh -NoProfile -File scripts/build-package.ps1`；生成 `dist/` 下 ZIP 和 SHA256。

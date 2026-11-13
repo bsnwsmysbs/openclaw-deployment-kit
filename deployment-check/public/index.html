@@ -16,7 +16,7 @@
     <a class="nav-item" href="#powershell-setup"><span>①</span> PowerShell 7 安装</a>
     <a class="nav-item selected" href="#overview"><span>◫</span> 安装自检 <span class="nav-dot"></span></a>
     <a class="nav-item" href="#checklist"><span>☷</span> 检查清单</a>
-    <a class="nav-item" href="#deployment"><span>↥</span> ZIP 一键部署</a>
+    <a class="nav-item" href="#deployment"><span>↥</span> 轻量版一键部署</a>
     <button class="nav-item" id="sidebar-report"><span>↧</span> 导出检查报告</button>
     <div class="sidebar-bottom"><span class="local-dot"></span> 仅在当前电脑运行<p>从环境准备到使用验收，<br>每一步都有据可查。</p><div class="sidebar-version">WINDOWS · LOCAL CHECK</div></div>
   </aside>
@@ -41,10 +41,10 @@
       </section>
       <section class="setup-card" aria-label="检测设置"><div class="path-field"><label for="install-dir">OpenClaw 安装目录 <span>检查与部署使用同一目录</span></label><div class="input-wrap"><span>▱</span><input id="install-dir" value="D:\OpenClawMeeting" spellcheck="false" autocomplete="off" aria-describedby="path-note"></div><small id="path-note">没有 D 盘？可改成 C:\OpenClawMeeting。默认已具备 PowerShell 7。</small></div><div class="setup-actions"><button class="button primary" id="run-all"><span>▷</span> 开始全面自检</button><button class="button secondary" id="export-report" disabled>↧ 导出报告</button></div></section>
       <div class="notice hidden" id="run-notice" role="status" aria-live="polite"></div>
-      <section class="deployment-card" id="deployment" aria-label="ZIP 一键部署">
-        <div class="deployment-heading"><div><div class="eyebrow">INSTALL FROM ZIP</div><h2>从安装包，一步部署到这台电脑</h2><p>选择 Windows Lite ZIP，自动解压、安装依赖、配置业务能力并启动网关。</p></div><span class="badge neutral" id="deploy-badge">等待安装包</span></div>
-        <div class="deploy-layout"><div class="upload-zone"><label for="package-file"><span class="upload-icon">↥</span><strong>选择 ZIP 安装包</strong><span>支持本项目生成的 Windows 包及已登记旧版包 · 最大 16 MB</span></label><input id="package-file" type="file" accept=".zip,application/zip"><p id="package-info">安装包仅传到当前电脑，不上传到云端。</p></div>
-        <div class="deploy-fields"><label for="deploy-key">DeepSeek API Key <span>选填，可安装后设置</span></label><input id="deploy-key" type="password" autocomplete="off" placeholder="sk-…"><div class="deploy-options"><div><label for="deploy-port">网关端口</label><input id="deploy-port" type="number" min="1024" max="65535" value="18789"></div><label class="business-choice"><input id="deploy-business" type="checkbox" checked> 安装七大业务场景</label></div><button class="button primary" id="deploy-button" disabled>↥ 解压并一键部署</button></div></div>
+      <section class="deployment-card" id="deployment" aria-label="轻量版一键部署">
+        <div class="deployment-heading"><div><div class="eyebrow">WINDOWS LITE · ONE CLICK</div><h2>使用仓库自带轻量版，安装到这台电脑</h2><p>下载一份仓库即可开始，自动安装依赖、配置业务能力并启动网关。</p></div><span class="badge neutral" id="deploy-badge">正在准备轻量版</span></div>
+        <div class="deploy-layout"><div class="upload-zone bundled-zone"><span class="upload-icon">✓</span><strong>已包含 Windows Lite 轻量版</strong><p id="package-info">正在读取仓库自带安装文件…</p><button class="button secondary" id="use-bundled">使用仓库自带轻量版</button><details class="alternate-package"><summary>其他方式：上传轻量版 ZIP</summary><label for="package-file">选择 ZIP 安装包（最大 16 MB）</label><input id="package-file" type="file" accept=".zip,application/zip"><p>支持当前源码包和已登记旧版包。安装包仅传到当前电脑。</p></details></div>
+        <div class="deploy-fields"><label for="deploy-key">DeepSeek API Key <span>选填，可安装后设置</span></label><input id="deploy-key" type="password" autocomplete="off" placeholder="sk-…"><div class="deploy-options"><div><label for="deploy-port">网关端口</label><input id="deploy-port" type="number" min="1024" max="65535" value="18789"></div><label class="business-choice"><input id="deploy-business" type="checkbox" checked> 安装七大业务场景</label></div><button class="button primary" id="deploy-button" disabled>↥ 安装仓库自带轻量版</button></div></div>
         <p class="deploy-scope">部署到上方填写的新目录；已有内容时会阻止安装。将创建桌面工作台并开启当前用户登录自启。需预先安装 Node.js ≥ 24.16.0，安装时联网下载 OpenClaw。</p>
         <div class="deploy-status hidden" id="deploy-status" role="status" aria-live="polite"><strong id="deploy-message"></strong><div class="progress-track"><div id="deploy-progress"></div></div><span id="deploy-stage"></span><details id="deploy-log-details"><summary>查看安装日志</summary><pre id="deploy-log"></pre></details></div>
       </section>

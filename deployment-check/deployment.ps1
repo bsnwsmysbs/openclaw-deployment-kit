@@ -4,6 +4,7 @@ $script:packageSource = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..\pack
 $script:runtimeRoot = Join-Path ([Environment]::GetFolderPath('LocalApplicationData')) 'OpenClawDeploymentKit'
 $script:uploads = @{}
 $script:deployment = $null
+$script:bundledPackageId = $null
 
 function Assert-InstallTarget([string]$Directory) {
     # The delivery script embeds this path in CMD and PowerShell scripts. Restrict it to safe literal characters.
@@ -104,6 +105,32 @@ function Save-Package([byte[]]$Bytes) {
     } catch {
         # Only this upload's generated file is removed.
         Remove-Item -LiteralPath $zipPath -Force -ErrorAction SilentlyContinue
+        throw
+    }
+}
+
+function Get-BundledPackage {
+    foreach ($required in @('manifest.json','install.ps1','install.cmd','templates\openclaw.json.template','preload\workspace\AGENTS.md')) {
+        if (-not (Test-Path -LiteralPath (Join-Path $script:packageSource $required) -PathType Leaf)) { throw 'PACKAGE_SOURCE_MISSING' }
+    }
+    if ($script:bundledPackageId -and $script:uploads.ContainsKey($script:bundledPackageId)) {
+        $saved = $script:uploads[$script:bundledPackageId]
+        $saved.package = Get-ZipPackage $saved.path
+        return @{packageId=$script:bundledPackageId;package=$saved.package;source='bundled'}
+    }
+    # Snapshot the repository's Lite source and reuse the exact ZIP validation/worker pipeline.
+    $id = [Guid]::NewGuid().ToString('N')
+    $folder = Join-Path $script:runtimeRoot ('uploads\' + $id)
+    New-Item -ItemType Directory -Path $folder -Force | Out-Null
+    $zipPath = Join-Path $folder 'package.zip'
+    try {
+        [IO.Compression.ZipFile]::CreateFromDirectory($script:packageSource, $zipPath, [IO.Compression.CompressionLevel]::Optimal, $true)
+        $package = Get-ZipPackage $zipPath
+        $script:uploads[$id] = @{path=$zipPath;package=$package}
+        $script:bundledPackageId = $id
+        return @{packageId=$id;package=$package;source='bundled'}
+    } catch {
+        if (Test-Path -LiteralPath $zipPath) { Remove-Item -LiteralPath $zipPath -Force }
         throw
     }
 }

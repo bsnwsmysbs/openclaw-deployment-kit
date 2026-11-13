@@ -65,6 +65,16 @@ Write-Output '[10/10] Test fixture completed'
         $response=Invoke-WebRequest ($url+$Path) -Method Post -Headers @{'X-Check-Token'=$token} -ContentType 'application/json' -Body ($Body | ConvertTo-Json -Compress) -SkipHttpErrorCheck
         return ($response.Content | ConvertFrom-Json).error
     }
+    $missingManifest = Join-Path $packageRoot 'manifest.json'
+    Move-Item -LiteralPath $missingManifest -Destination ($missingManifest + '.held')
+    try {
+        Assert-Test ((Error-Code '/api/packages/bundled' @{}) -eq 'PACKAGE_SOURCE_MISSING') 'Incomplete repository reports bundled package missing'
+    } finally { Move-Item -LiteralPath ($missingManifest + '.held') -Destination $missingManifest }
+    $bundled = Api '/api/packages/bundled' @{}
+    $runtimeItems.Add(('uploads\' + $bundled.packageId))
+    Assert-Test ($bundled.source -eq 'bundled' -and $bundled.package.version -eq 'test' -and $bundled.package.fileCount -eq 5) 'Repository Lite package is ready without any upload'
+    $again = Api '/api/packages/bundled' @{}
+    Assert-Test ($again.packageId -eq $bundled.packageId) 'Repeated page load reuses verified bundled snapshot'
     $upload = Upload $zip
     $runtimeItems.Add(('uploads\' + $upload.packageId))
     Assert-Test ($upload.package.fileCount -eq 5 -and $upload.package.version -eq 'test') 'Binary ZIP upload and per-file trust verification'
@@ -72,6 +82,7 @@ Write-Output '[10/10] Test fixture completed'
     'throw "unexpected"' | Add-Content -LiteralPath (Join-Path $packageRoot 'install.ps1')
     $untrusted=Invoke-WebRequest "$url/api/packages" -Method Post -Headers @{'X-Check-Token'=$token} -ContentType 'application/zip' -InFile $zip -SkipHttpErrorCheck
     Assert-Test (($untrusted.Content | ConvertFrom-Json).error -eq 'ZIP_UNTRUSTED') 'Changed source rejects old unregistered ZIP'
+    Assert-Test ((Error-Code '/api/packages/bundled' @{}) -eq 'ZIP_UNTRUSTED') 'Changed repository source invalidates bundled snapshot'
     # Restore exact fixture source by extracting the already generated archive to another folder then copying one file.
     $restore=Join-Path $sandbox 'restore'
     [IO.Compression.ZipFile]::ExtractToDirectory($zip,$restore)
@@ -82,12 +93,12 @@ Write-Output '[10/10] Test fixture completed'
     $bad=Invoke-WebRequest "$url/api/packages" -Method Post -Headers @{'X-Check-Token'=$token} -ContentType 'application/zip' -InFile $unsafe -SkipHttpErrorCheck
     Assert-Test (($bad.Content | ConvertFrom-Json).error -eq 'ZIP_UNSAFE_PATH') 'ZIP traversal is rejected before extraction'
     $target=Join-Path $sandbox 'success'
-    $body=@{packageId=$upload.packageId;installDir=$target;port=$gatewayPort;apiKey='sk-TEST_SECRET_NOT_REAL_12345';includeBusiness=$true}
+    $body=@{packageId=$bundled.packageId;installDir=$target;port=$gatewayPort;apiKey='sk-TEST_SECRET_NOT_REAL_12345';includeBusiness=$true}
     Assert-Test ((Error-Code '/api/deploy' (@{packageId=$upload.packageId;installDir=$env:WINDIR;port=$gatewayPort})) -eq 'DEPLOY_PATH_PROTECTED') 'System directory cannot be an installation target'
     Assert-Test ((Error-Code '/api/deploy' (@{packageId=$upload.packageId;installDir=$sandbox;port=$gatewayPort})) -eq 'DEPLOY_TARGET_NOT_EMPTY') 'Existing nonempty target is protected'
     $started=Api '/api/deploy' $body
     $runtimeItems.Add(('jobs\' + $started.jobId))
-    Assert-Test ($started.status -eq 'running') 'ZIP extracts and launches a separate installation worker'
+    Assert-Test ($started.status -eq 'running') 'Bundled source extracts and launches a separate installation worker'
     Assert-Test ((Test-Path -LiteralPath (Join-Path $sandbox 'local\OpenClawDeploymentKit\jobs')) -or (Test-Path -LiteralPath (Join-Path ([Environment]::GetFolderPath('LocalApplicationData')) 'OpenClawDeploymentKit\jobs'))) 'Job directory exists'
     Assert-Test ((Error-Code '/api/deploy' $body) -eq 'DEPLOY_BUSY') 'Concurrent deployment is rejected'
     # Worker is already running. Now provide a harmless loopback OpenClaw-like page.

@@ -27,9 +27,11 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\server.ps1
 5. 完成实际对话、资料导出、重启验收后，勾选对应人工验收项。
 6. 导出 TXT 检查报告，用于部署交接。
 
-## ZIP 一键部署
+## 轻量版一键部署
 
-完整仓库还包含 `packages/windows/` 安装源码。运行根目录 `scripts/build-package.ps1` 生成 ZIP，在网页选择包、填写可选 Key 和端口，点击“解压并一键部署”。页面显示安装进度与脱敏日志，失败标红，成功后自动全面自检。
+完整仓库包含最新 Windows Lite 0.3.0 的 `packages/windows/` 安装源码。网页自动选中它，填写可选 Key 和端口，点击“安装仓库自带轻量版”。无需另外下载、打包或上传 ZIP。页面显示安装进度与脱敏日志，失败标红，成功后自动全面自检。
+
+若需使用单独的 ZIP，可展开“其他方式：上传轻量版 ZIP”。[Releases](https://github.com/bsnwsmysbs/openclaw-deployment-kit/releases/tag/v0.3.0) 提供轻量版 ZIP 与 SHA256，或运行根目录 `scripts/build-package.ps1` 生成相同源码包。
 
 安装需要系统 Node >= 24.16.0 与 npm，只接受新的空目录。默认预置七大场景、桌面工作台和当前用户登录自启；业务定时任务禁用。ZIP 需逐文件匹配当前仓库源码，或匹配已登记旧版包的精确 SHA256。不要只分发本目录而遗漏安装源码。
 

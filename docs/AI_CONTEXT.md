@@ -4,6 +4,8 @@
 
 Windows 上用 PowerShell 7 启动的本地 H5 工具。检查已安装环境，也支持从可信 Windows Lite ZIP 新装 OpenClaw 和七大业务场景。
 
+默认使用仓库自带的最新轻量版 `packages/windows/`，无需用户准备第二份 ZIP。独立轻量版 ZIP 与 SHA256 发布在 GitHub Releases v0.3.0，与此目录逐文件一致。
+
 ## 阅读顺序
 
 1. 根目录 `AGENTS.md`：仓库规则与入口。
@@ -23,6 +25,7 @@ Windows 上用 PowerShell 7 启动的本地 H5 工具。检查已安装环境，
 ```text
 start.cmd → pwsh server.ps1 → 本机浏览器
   ├─ POST /api/check → 逐项探测 → pass / fail / warn
+  ├─ POST /api/packages/bundled → 仓库轻量版打快照并校验 → packageId（默认方式）
   ├─ POST /api/packages (ZIP 原始字节) → 路径/体积/哈希校验 → packageId
   └─ POST /api/deploy (packageId + 目录/端口/Key/场景选项)
       → 新目录与环境检查 → 再次校验并解压 ZIP
@@ -34,6 +37,8 @@ start.cmd → pwsh server.ps1 → 本机浏览器
 所有 POST 需本次服务会话的 `X-Check-Token`，允许本机同源；Host/Origin 校验、ZIP 16 MB/展开 64 MB 上限、路径穿越/重复路径/符号链接/未知安装器拦截。UI 失败项显示红色。
 
 请求 JSON 是 UTF-8，ZIP 是二进制；HTTP 解析器按 Content-Length 读取字节，不使用字符数读取二进制。安装器用独立进程运行，状态请求不会等整个 npm 安装。
+
+内置包每个服务进程只生成一份快照；再次选用和真正部署时都校验快照与源码是否一致，源码变更后需重启检查台。内置与上传使用同一条校验、空目录保护、独立安装进程和进度接口。
 
 任务状态：`idle`、`running`、`succeeded`、`failed`；阶段：`starting`、`installer`、`gateway`、`complete`。页面刷新可恢复当前服务进程内的任务状态。重启检查台后不自动重新启动或恢复旧部署；原有日志仍在 LocalAppData。先人工确认旧任务是否还在运行，避免重复安装。
 

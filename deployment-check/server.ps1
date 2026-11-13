@@ -328,9 +328,11 @@ try {
                 }
                 $json = $result | ConvertTo-Json -Depth 6 -Compress
                 Send-Response $stream 200 'application/json; charset=utf-8' ($utf8.GetBytes($json))
-            } elseif ($http.method -eq 'POST' -and $path -in @('/api/packages','/api/deploy','/api/deploy/status')) {
+            } elseif ($http.method -eq 'POST' -and $path -in @('/api/packages','/api/packages/bundled','/api/deploy','/api/deploy/status')) {
                 try {
-                    if ($path -eq '/api/packages') {
+                    if ($path -eq '/api/packages/bundled') {
+                        $result = Get-BundledPackage
+                    } elseif ($path -eq '/api/packages') {
                         $result = Save-Package $http.payload
                     } elseif ($path -eq '/api/deploy') {
                         $body = $utf8.GetString($http.payload) | ConvertFrom-Json

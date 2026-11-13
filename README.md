@@ -1,6 +1,6 @@
 # OpenClaw Deployment Kit
 
-Windows 本机部署检查台 + ZIP 一键安装 + 七大企业业务场景。用于把 OpenClaw 交付到新电脑，并逐项验收安装情况。
+Windows 本机部署检查台 + 自带最新轻量版一键安装 + 七大企业业务场景。下载一份仓库即可部署到新电脑，并逐项验收安装情况。
 
 **AI 工具从 [AGENTS.md](AGENTS.md) 开始，再读 [AI_CONTEXT.md](docs/AI_CONTEXT.md)。**
 
@@ -8,7 +8,8 @@ Windows 本机部署检查台 + ZIP 一键安装 + 七大企业业务场景。�
 
 | 下载内容 | 地址与用途 |
 | --- | --- |
-| 本项目代码 ZIP | [下载 main 分支](https://github.com/bsnwsmysbs/openclaw-deployment-kit/archive/refs/heads/main.zip)，无需登录 GitHub |
+| 推荐：源码与网页完整包 | [下载 main 分支 ZIP](https://github.com/bsnwsmysbs/openclaw-deployment-kit/archive/refs/heads/main.zip)，已包含 Windows Lite 0.3.0 安装源码、网页和七大场景，无需另下安装 ZIP |
+| 单独的轻量版安装 ZIP | [Windows Lite 0.3.0](https://github.com/bsnwsmysbs/openclaw-deployment-kit/releases/download/v0.3.0/OpenClawMeeting-Windows-0.3.0.zip) · [SHA256](https://github.com/bsnwsmysbs/openclaw-deployment-kit/releases/download/v0.3.0/OpenClawMeeting-Windows-0.3.0.zip.sha256)，用于命令行安装或网页的可选 ZIP 上传 |
 | PowerShell 7 官方下载 | [微软 Windows 安装与下载页](https://learn.microsoft.com/zh-cn/powershell/scripting/install/installing-powershell-on-windows)，选择稳定版 Windows x64 MSI，并启用添加到 PATH |
 | PowerShell 官方发布页 | [PowerShell Releases](https://github.com/PowerShell/PowerShell/releases)，手动下载时选择稳定版的 `win-x64.msi`，跳过 Preview / RC |
 | 首次安装图文步骤 | [仓库安装说明](docs/DEPLOYMENT.md)；解压后也可双击 `deployment-check/public/powershell7.html` 查看独立网页指南 |
@@ -41,17 +42,19 @@ cd openclaw-deployment-kit
 
 1. 填写安装目录，例如 `D:\OpenClawMeeting`；只有 C 盘可填 `C:\OpenClawMeeting`。
 2. 点击“开始全面自检”。16 项自动检查逐项打勾；失败标红、展开处理建议，支持单项重试。
-3. 新装时准备 ZIP：运行下面的打包命令，或使用已登记的历史 Windows Lite 0.2.13 ZIP。
-4. 在页面中选择 ZIP，填可选 DeepSeek Key 和端口，点击“解压并一键部署”。
-5. 页面自动解压、调用安装脚本、显示日志和进度，验证网关页面；成功后运行全面自检。
+3. 网页自动选中仓库内的 Windows Lite 0.3.0，无需准备第二份 ZIP。
+4. 填可选 DeepSeek Key 和端口，点击“安装仓库自带轻量版”。
+5. 页面自动准备安装文件、调用安装脚本、显示日志和进度，验证网关页面；成功后运行全面自检。
 6. 完成实际对话、Word 导出和重启验收，再勾选人工验收项，导出 TXT 报告。
 
 ```powershell
-# 从仓库源码生成安装包与校验文件
+# 可选：需要单独分发轻量版时，从同一份源码生成 ZIP 和校验文件
 pwsh -NoProfile -File .\scripts\build-package.ps1
 ```
 
 安装需要系统 Node.js **≥ 24.16.0** 和正常的 npm，以及 npm 镜像与模型服务网络。检查台会提示缺失环境，不自动安装 Node。交付版固定 OpenClaw **2026.6.1**，关闭自动更新。
+
+单独的轻量版 ZIP 发布在 [Releases](https://github.com/bsnwsmysbs/openclaw-deployment-kit/releases/tag/v0.3.0)，解压后运行其中的 `windows/install.cmd`。它和仓库 `packages/windows/` 内容一致，包含安装器和业务资料，不包含网页、Node 或完整运行依赖。使用网页时，直接下载上面的完整仓库包即可。切换其他受支持的包可展开“其他方式：上传轻量版 ZIP”。
 
 一键部署仅安装到新的空目录，不覆盖现有部署。默认安装七大场景、创建“桌面\龙虾工作台”并启用当前用户登录自启。基础版可以取消勾选七大场景；自动检查清单仍以业务增强版为基准，因此基础版 Skill 项会显示失败，需要按交付范围人工判定。
 

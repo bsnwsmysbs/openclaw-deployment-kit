@@ -17,6 +17,7 @@ const deploymentErrors = {
   DEPLOY_PORT_BUSY: '网关端口已被占用。请更换端口，或先处理正在运行的旧网关。',
   DEPLOY_BUSY: '已有部署任务正在运行，请等待当前任务结束。',
   PACKAGE_NOT_FOUND: '安装包会话已失效，请重新选择 ZIP。',
+  PACKAGE_SOURCE_MISSING: '仓库内的轻量版文件不完整，请重新下载完整仓库并解压后启动。',
   MODEL_KEY_FORMAT: 'DeepSeek Key 格式不正确。请核对，或留空后续配置。',
   NODE_MISSING: '还没有安装 Node.js。请先安装 Node.js ≥ 24.16.0，再重新启动检查台。',
   NODE_OLD: 'Node.js 版本过低，请升级到 ≥ 24.16.0 后重新启动检查台。',
@@ -43,11 +44,35 @@ async function deployApi(path, body, binary = false) {
 function syncDeploymentControls() {
   const busy = running || deploymentBusy || uploadingPackage;
   $('#package-file').disabled = busy;
+  $('#use-bundled').disabled = busy;
   $('#deploy-key').disabled = busy;
   $('#deploy-port').disabled = busy;
   $('#deploy-business').disabled = busy;
   $('#deploy-button').disabled = busy || !selectedPackage;
 }
+async function useBundledPackage() {
+  if (running || deploymentBusy || uploadingPackage) return;
+  selectedPackage = null;
+  uploadingPackage = true;
+  syncDeploymentControls();
+  $('#deploy-status').classList.add('hidden');
+  $('#deploy-badge').className = 'badge neutral';
+  $('#deploy-badge').textContent = '正在读取轻量版';
+  $('#package-info').textContent = '正在准备仓库自带的轻量版…';
+  try {
+    const result = await deployApi('/api/packages/bundled', {});
+    selectedPackage = result;
+    $('#package-file').value = '';
+    $('#package-info').textContent = `仓库自带 Windows Lite v${result.package.version} · OpenClaw ${result.package.openclawVersion} · ${result.package.fileCount} 个文件，无需另选 ZIP。`;
+    $('#deploy-badge').className = 'badge pass';
+    $('#deploy-badge').textContent = '轻量版已就绪';
+    $('#deploy-button').textContent = '↥ 安装仓库自带轻量版';
+  } catch (error) {
+    showDeployError(error);
+    $('#package-info').textContent = '轻量版未就绪，请检查仓库是否完整，或展开下方选项上传 ZIP。';
+  } finally { uploadingPackage = false; syncDeploymentControls(); }
+}
+$('#use-bundled').addEventListener('click', useBundledPackage);
 function showDeployError(error) {
   const code = error.name === 'AbortError' ? 'REQUEST_TIMEOUT' : error.message;
   const text = deploymentErrors[code] || '本地检测程序没有响应，请确认启动窗口仍在运行，刷新页面后重新查询。';
@@ -71,6 +96,7 @@ $('#package-file').addEventListener('change', async () => {
   try {
     const result = await deployApi('/api/packages', file, true);
     selectedPackage = result;
+    $('#deploy-button').textContent = '↥ 解压并安装所选 ZIP';
     const pkg = result.package;
     $('#package-info').textContent = `${file.name} · v${pkg.version} · ${pkg.fileCount} 个文件 · SHA256 ${pkg.sha256.slice(0, 12)}…`;
     $('#deploy-badge').textContent = '安装包已校验';
@@ -137,5 +163,9 @@ $('#deploy-button').addEventListener('click', async () => {
     } catch { deploymentBusy = false; }
   } finally { updateSummary(); }
 });
-syncDeploymentControls();
-pollDeployment(true);
+async function initializeDeployment() {
+  syncDeploymentControls();
+  await useBundledPackage();
+  await pollDeployment(true);
+}
+initializeDeployment();
