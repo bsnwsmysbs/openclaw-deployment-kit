@@ -13,6 +13,7 @@
   <aside class="sidebar">
     <a class="brand" href="/" aria-label="部署检查台首页"><span class="brand-icon">C<span>·</span></span><span>OpenClaw<small>本机部署检查台</small></span></a>
     <div class="nav-label">部署工作台</div>
+    <a class="nav-item" href="#powershell-setup"><span>①</span> PowerShell 7 安装</a>
     <a class="nav-item selected" href="#overview"><span>◫</span> 安装自检 <span class="nav-dot"></span></a>
     <a class="nav-item" href="#checklist"><span>☷</span> 检查清单</a>
     <a class="nav-item" href="#deployment"><span>↥</span> ZIP 一键部署</a>
@@ -23,6 +24,15 @@
     <header class="topbar"><div>工作台 <span>/</span> <strong>安装自检</strong></div><span class="connection" id="connection"><i></i> 本地检测程序已连接</span></header>
     <div class="content">
       <section class="page-heading" id="overview"><div><div class="eyebrow">DEPLOYMENT CHECK</div><h1>让每一步安装，都心中有数<span>。</span></h1><p>逐项检查当前电脑的部署情况，找到问题，再继续下一步。</p></div><div class="os-tag"><span>⊞</span> Windows 本机</div></section>
+      <section class="prerequisite-card" id="powershell-setup" aria-label="PowerShell 7 安装步骤">
+        <div class="eyebrow">STEP 0 · POWERSHELL 7</div>
+        <h2>新电脑先安装 PowerShell 7</h2>
+        <p>已安装可以跳过。首次安装时，在 Windows 开始菜单打开“命令提示符”或系统自带的 Windows PowerShell，执行：</p>
+        <pre><code>winget install --id Microsoft.PowerShell --exact --source winget</code></pre>
+        <p>按提示完成安装后，关闭并重新打开终端，执行 <code>pwsh --version</code>，应显示 <code>PowerShell 7.x</code>。然后双击 <code>deployment-check\start.cmd</code> 打开检查台。</p>
+        <p>没有 winget？按 <a href="https://learn.microsoft.com/zh-cn/powershell/scripting/install/installing-powershell-on-windows" target="_blank" rel="noopener noreferrer">微软官方安装说明 ↗</a> 下载稳定版 x64 MSI，安装时启用“添加到 PATH”。Windows 自带的 PowerShell 5.1 需要另行安装 7。</p>
+        <a class="prerequisite-guide" href="/powershell7.html" target="_blank" rel="noopener">打开独立安装指南 ↗</a>
+      </section>
       <section class="overview-grid" aria-label="检查概览">
         <div class="progress-card"><div class="card-top"><span>整体部署进度</span><span class="badge neutral" id="overall-status">尚未检查</span></div><div class="progress-number"><strong id="pass-count">0</strong><span>/ <span id="total-count">0</span> 项通过</span><span class="percent" id="progress-percent">0%</span></div><div class="progress-track"><div id="progress-fill"></div></div><p id="progress-note">准备好后，点击「开始全面自检」。</p></div>
         <div class="stat-card"><span class="stat-icon success">✓</span><div><strong id="success-count">0</strong><span>检查通过</span></div></div>

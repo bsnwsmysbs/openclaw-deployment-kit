@@ -8,6 +8,14 @@ Windows 本机部署检查台 + ZIP 一键安装 + 七大企业业务场景。�
 
 前提：Windows x64，已安装 PowerShell 7。检查台本身不依赖 Node.js。
 
+首次使用尚未安装 PowerShell 7 时，可直接双击打开 [独立安装指南](deployment-check/public/powershell7.html)，无需启动网页服务。在系统自带的命令提示符或 Windows PowerShell 中执行：
+
+```powershell
+winget install --id Microsoft.PowerShell --exact --source winget
+```
+
+完成后重新打开终端，运行 `pwsh --version`，确认显示 `PowerShell 7.x`。没有 winget 时参照[微软官方说明](https://learn.microsoft.com/zh-cn/powershell/scripting/install/installing-powershell-on-windows)安装稳定版 x64 MSI，启用添加到 PATH。网页首页也提供相同安装步骤。
+
 ```powershell
 git clone https://github.com/bsnwsmysbs/openclaw-deployment-kit.git
 cd openclaw-deployment-kit

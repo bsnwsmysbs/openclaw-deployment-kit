@@ -342,12 +342,13 @@ try {
                     if ($code -notmatch '^(ZIP_|DEPLOY_|PACKAGE_|NODE_|NPM_|MODEL_KEY_FORMAT)[A-Z_]*$') { $code = 'DEPLOY_REQUEST_FAILED' }
                     Send-Response $stream 400 'application/json; charset=utf-8' ($utf8.GetBytes((@{error=$code} | ConvertTo-Json -Compress)))
                 }
-            } elseif ($http.method -eq 'GET' -and $path -in @('/', '/index.html', '/app.js', '/deploy.js', '/style.css')) {
+            } elseif ($http.method -eq 'GET' -and $path -in @('/', '/index.html', '/powershell7.html', '/app.js', '/deploy.js', '/style.css')) {
                 if ($path -in @('/', '/index.html')) {
                     $html = [IO.File]::ReadAllText((Join-Path $root 'public\index.html'), $utf8).Replace('__CHECK_SESSION__', $sessionToken)
                     Send-Response $stream 200 'text/html; charset=utf-8' ($utf8.GetBytes($html))
                 } else {
                     $type = 'text/css; charset=utf-8'
+                    if ($path -eq '/powershell7.html') { $type = 'text/html; charset=utf-8' }
                     if ($path -in @('/app.js','/deploy.js')) { $type = 'text/javascript; charset=utf-8' }
                     Send-Response $stream 200 $type ([IO.File]::ReadAllBytes((Join-Path $root ('public' + $path.Replace('/','\')))))
                 }
