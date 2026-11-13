@@ -25,7 +25,7 @@
       <p>显示 <code>PowerShell 7.x</code> 即可。如果找不到命令，确认安装完成，或从开始菜单打开“PowerShell 7”后重试。</p>
       <ol start="4">
         <li>回到解压后的仓库，双击 <code>deployment-check\start.cmd</code>，浏览器将打开本机检查台。</li>
-        <li>运行全面自检，继续准备 Node.js ≥ 24.16.0 和 npm，然后点击“安装仓库自带轻量版”完成部署。</li>
+        <li>运行全面自检，Node.js/npm 缺失、过旧或无法运行时会自动通过 winget 安装；若弹出系统授权窗口，请允许安装。检查通过后点击“安装仓库自带轻量版”完成部署。</li>
       </ol>
       <p>Windows 自带的 PowerShell 5.1 仍会保留，请使用新安装的 PowerShell 7。</p>
     </section>

@@ -23,9 +23,15 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\server.ps1
 1. 填写实际安装目录，默认为 `D:\OpenClawMeeting`。
 2. 点击“开始全面自检”，每项显示等待、运行、通过、失败或待确认。
 3. 失败项自动标红并展开原因和处理方法。其他检查继续执行。
-4. 按处理方法手动修复后，点击单项“重试”。自检不会执行修复命令。
+4. Node.js/npm 缺失、过旧或无法执行时，会自动通过 winget 安装 Node.js LTS；若弹出系统授权窗口，请允许安装。页面展示进度与日志，实际验证通过后才继续。没有 winget 时需按提示手动安装。其他失败项按处理方法修复后，点击单项“重试”。
 5. 完成实际对话、资料导出、重启验收后，勾选对应人工验收项。
 6. 导出 TXT 检查报告，用于部署交接。
+
+## 安装后补填 SK 密钥
+
+确认上方是已有安装目录，在“补填／修改 SK 密钥”输入 DeepSeek `sk-…` 并点击“保存并检查密钥”。保存会备份并更新 `openclaw-local.cmd`，不更改网关令牌；不回显密钥，输入框在提交结束后清空。仅支持官方 DeepSeek 配置；若配置文件直接指定了其他 apiKey，会提示先处理配置，避免新密钥被覆盖。
+
+模型目录检查通过仍需重启正在运行的网关：先运行安装目录 `stop-gateway.cmd`，再运行 `start-gateway.cmd`，随后实际对话确认。页面不自动重启现有网关。
 
 ## 轻量版一键部署
 
@@ -46,7 +52,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\server.ps1
 - 检查目标为七大场景业务增强版；基础版缺少业务 Skill 会显示失败，这是验收基准差异。
 - 登录自启自动检查针对当前交付包的 VBS 启动文件夹方案，计划任务及 Windows 服务需人工核实。
 - Skill 文件或导出工具存在不能证明业务成功，仍需实际使用验收。
-- 自检不写入目标安装目录；点击部署按钮会真实安装程序和启动网关。报告导出由浏览器下载到用户指定位置。
+- 普通检查不写入目标安装目录；Node/npm 检查可触发系统运行环境安装。“保存并检查密钥”会备份并修改目标启动配置；部署按钮会真实安装程序和启动网关。报告导出由浏览器下载到用户指定位置。
 
 ## 实现
 
@@ -63,6 +69,8 @@ deployment-check/
 ```
 
 部署实现位于 `deployment.ps1` 和 `deploy-worker.ps1`，前端在 `public/deploy.js`。上传包与日志保存在 `%LOCALAPPDATA%\OpenClawDeploymentKit`；旧交付包原件保持不变。
+
+Node 自动安装位于 `node-setup.ps1` 与 `public/node-setup.js`，接口为 `POST /api/node/setup`、`POST /api/node/status`；补填密钥位于 `model-key.ps1` 与 `public/model-key.js`，接口为 `POST /api/model/key`。这些操作均受会话令牌和同源校验保护。运行环境安装与程序部署互斥，安装运行中不要重启检查台；状态仅保存在当前服务进程内，原有日志留存在 LocalAppData。
 
 ## 验证
 

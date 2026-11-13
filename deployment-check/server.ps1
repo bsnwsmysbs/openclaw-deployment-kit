@@ -56,7 +56,12 @@ function Read-Config([string]$InstallDir) {
     if (-not (Test-Path -LiteralPath $path -PathType Leaf)) { throw 'CONFIG_MISSING' }
     try { return (Get-Content -LiteralPath $path -Raw -Encoding UTF8 | ConvertFrom-Json) } catch { throw 'CONFIG_INVALID' }
 }
+function Refresh-NodePath {
+    $paths = @([Environment]::GetEnvironmentVariable('Path','Machine'), [Environment]::GetEnvironmentVariable('Path','User'), $env:PATH)
+    $env:PATH = (($paths -join ';').Split(';') | Where-Object { $_ } | Select-Object -Unique) -join ';'
+}
 function Find-Node {
+    Refresh-NodePath
     $cmd = Get-Command node.exe -ErrorAction SilentlyContinue
     if ($cmd) { return $cmd.Source }
     $candidate = Join-Path $env:ProgramFiles 'nodejs\node.exe'
@@ -240,6 +245,8 @@ function Check([string]$Id, [string]$InstallDir) {
     }
 }
 . (Join-Path $PSScriptRoot 'deployment.ps1')
+. (Join-Path $PSScriptRoot 'node-setup.ps1')
+. (Join-Path $PSScriptRoot 'model-key.ps1')
 
 function Read-HttpRequest($Stream) {
     # Parse headers without buffered text reads, so binary ZIP bodies remain byte-exact.
@@ -328,9 +335,16 @@ try {
                 }
                 $json = $result | ConvertTo-Json -Depth 6 -Compress
                 Send-Response $stream 200 'application/json; charset=utf-8' ($utf8.GetBytes($json))
-            } elseif ($http.method -eq 'POST' -and $path -in @('/api/packages','/api/packages/bundled','/api/deploy','/api/deploy/status')) {
+            } elseif ($http.method -eq 'POST' -and $path -in @('/api/packages','/api/packages/bundled','/api/deploy','/api/deploy/status','/api/node/setup','/api/node/status','/api/model/key')) {
                 try {
-                    if ($path -eq '/api/packages/bundled') {
+                    if ($path -eq '/api/model/key') {
+                        $body = $utf8.GetString($http.payload) | ConvertFrom-Json
+                        $result = Save-ModelKey $body
+                    } elseif ($path -eq '/api/node/setup') {
+                        $result = Start-NodeSetup
+                    } elseif ($path -eq '/api/node/status') {
+                        $result = Get-NodeSetupStatus
+                    } elseif ($path -eq '/api/packages/bundled') {
                         $result = Get-BundledPackage
                     } elseif ($path -eq '/api/packages') {
                         $result = Save-Package $http.payload
@@ -341,17 +355,17 @@ try {
                     Send-Response $stream 200 'application/json; charset=utf-8' ($utf8.GetBytes(($result | ConvertTo-Json -Depth 8 -Compress)))
                 } catch {
                     $code = [string]$_.Exception.Message
-                    if ($code -notmatch '^(ZIP_|DEPLOY_|PACKAGE_|NODE_|NPM_|MODEL_KEY_FORMAT)[A-Z_]*$') { $code = 'DEPLOY_REQUEST_FAILED' }
+                    if ($code -notmatch '^(ZIP_|DEPLOY_|PACKAGE_|NODE_|NPM_|MODEL_KEY_)[A-Z_]*$') { $code = 'DEPLOY_REQUEST_FAILED' }
                     Send-Response $stream 400 'application/json; charset=utf-8' ($utf8.GetBytes((@{error=$code} | ConvertTo-Json -Compress)))
                 }
-            } elseif ($http.method -eq 'GET' -and $path -in @('/', '/index.html', '/powershell7.html', '/app.js', '/deploy.js', '/style.css')) {
+            } elseif ($http.method -eq 'GET' -and $path -in @('/', '/index.html', '/powershell7.html', '/app.js', '/deploy.js', '/node-setup.js', '/model-key.js', '/style.css')) {
                 if ($path -in @('/', '/index.html')) {
                     $html = [IO.File]::ReadAllText((Join-Path $root 'public\index.html'), $utf8).Replace('__CHECK_SESSION__', $sessionToken)
                     Send-Response $stream 200 'text/html; charset=utf-8' ($utf8.GetBytes($html))
                 } else {
                     $type = 'text/css; charset=utf-8'
                     if ($path -eq '/powershell7.html') { $type = 'text/html; charset=utf-8' }
-                    if ($path -in @('/app.js','/deploy.js')) { $type = 'text/javascript; charset=utf-8' }
+                    if ($path -in @('/app.js','/deploy.js','/node-setup.js','/model-key.js')) { $type = 'text/javascript; charset=utf-8' }
                     Send-Response $stream 200 $type ([IO.File]::ReadAllBytes((Join-Path $root ('public' + $path.Replace('/','\')))))
                 }
             } else { Send-Response $stream 404 'text/plain; charset=utf-8' ($utf8.GetBytes('Not found')) }

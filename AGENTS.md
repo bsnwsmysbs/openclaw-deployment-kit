@@ -10,7 +10,9 @@
 - HTTP 检查与静态页面：`deployment-check/server.ps1`。
 - ZIP 校验、路径校验、任务启动与状态：`deployment-check/deployment.ps1`。
 - 独立安装进程：`deployment-check/deploy-worker.ps1`。
-- 页面：`deployment-check/public/{index.html,app.js,deploy.js,style.css}`。
+- Node/npm 检查失败后的自动安装与验证：`deployment-check/node-setup.ps1` 和 `public/node-setup.js`。
+- 已安装环境补填 SK 密钥：`deployment-check/model-key.ps1` 和 `public/model-key.js`；只备份并修改启动配置，需人工重启网关生效，不修改网关令牌。
+- 页面：`deployment-check/public/{index.html,app.js,deploy.js,node-setup.js,model-key.js,style.css}`。
 - 可维护的 Windows 安装包源码：`packages/windows/`；不是本机已安装程序目录。
 - 网页默认自动选中此目录的轻量版，经 `POST /api/packages/bundled` 创建校验快照；用户不需要另下 ZIP。独立轻量版 ZIP/SHA256 发布到 GitHub Releases，与该目录一致。
 - 七大业务规则与模板：`packages/windows/preload/skills/`。

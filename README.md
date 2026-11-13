@@ -52,7 +52,9 @@ cd openclaw-deployment-kit
 pwsh -NoProfile -File .\scripts\build-package.ps1
 ```
 
-安装需要系统 Node.js **≥ 24.16.0** 和正常的 npm，以及 npm 镜像与模型服务网络。检查台会提示缺失环境，不自动安装 Node。交付版固定 OpenClaw **2026.6.1**，关闭自动更新。
+安装需要系统 Node.js **≥ 24.16.0** 和正常的 npm，以及 npm 镜像与模型服务网络。点击全面自检或 Node/npm 单项检查时，缺失、过旧或无法运行会自动通过 winget 安装 Node.js LTS，展示日志，并实际执行 Node/npm 验证后才显示通过。若系统弹出授权窗口，请允许安装；没有 winget 时按失败提示手动安装。检查台会重新读取 PATH，通常无需重启。交付版固定 OpenClaw **2026.6.1**，关闭自动更新。
+
+已安装后补填或更换 DeepSeek Key：在网页“补填／修改 SK 密钥”输入 `sk-…`，点击“保存并检查密钥”。工具会备份旧启动文件，保存后清空输入框并查询官方模型目录。正在运行的网关需先运行安装目录 `stop-gateway.cmd`，再运行 `start-gateway.cmd`，最后实际对话验收。此操作不修改 Gateway token。
 
 单独的轻量版 ZIP 发布在 [Releases](https://github.com/bsnwsmysbs/openclaw-deployment-kit/releases/tag/v0.3.0)，解压后运行其中的 `windows/install.cmd`。它和仓库 `packages/windows/` 内容一致，包含安装器和业务资料，不包含网页、Node 或完整运行依赖。使用网页时，直接下载上面的完整仓库包即可。切换其他受支持的包可展开“其他方式：上传轻量版 ZIP”。
 

@@ -114,6 +114,25 @@ try { while($true){$c=$l.AcceptTcpClient();try{$s=$c.GetStream();$r=[IO.StreamRe
     if ($state.status -ne 'succeeded') { Write-Host ($state | ConvertTo-Json -Compress) }
     Assert-Test ($state.status -eq 'succeeded') 'Worker verifies installation artifacts and Gateway before success'
     Assert-Test ($state.log -notmatch 'TEST_SECRET_NOT_REAL' -and $state.log -match '\[REDACTED\]') 'API Key is redacted from deployment log'
+    $configPath=Join-Path $target 'config\openclaw.json'
+    $testConfig=@{gateway=@{bind='loopback';port=$gatewayPort;auth=@{token='fixture-only'}};agents=@{defaults=@{model=@{primary='deepseek/deepseek-chat'}}};models=@{providers=@{deepseek=@{baseUrl='https://api.deepseek.com'}}}}
+    $testConfig | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $configPath
+    $keyBody=@{installDir=$target;apiKey='sk-FAKE_KEY_FOR_TEST_12345'}
+    $saved=Api '/api/model/key' $keyBody
+    $wrapperPath=Join-Path $target 'openclaw-local.cmd'
+    Assert-Test ($saved.status -eq 'saved' -and (Get-Content -LiteralPath $wrapperPath -Raw) -match 'sk-FAKE_KEY_FOR_TEST_12345') 'Post-install key is saved to existing startup configuration'
+    Assert-Test (($saved | ConvertTo-Json -Depth 5) -notmatch 'sk-FAKE_KEY' -and $saved.restartRequired) 'Key response contains no credential and requires gateway restart'
+    $keyBody.apiKey='sk-FAKE_REPLACEMENT_KEY_12345'
+    Api '/api/model/key' $keyBody | Out-Null
+    $wrapperContent=Get-Content -LiteralPath $wrapperPath -Raw
+    Assert-Test (([regex]::Matches($wrapperContent,'DEEPSEEK_API_KEY=')).Count -eq 1 -and $wrapperContent -notmatch 'sk-FAKE_KEY_FOR_TEST') 'Replacing a key removes old assignments'
+    Assert-Test (@(Get-ChildItem -LiteralPath (Join-Path $target 'backup') -Filter '*.bak').Count -eq 2) 'Every key change preserves prior startup file'
+    Assert-Test ((Error-Code '/api/model/key' @{installDir=$target;apiKey="sk-malicious`r`nwhoami"}) -eq 'MODEL_KEY_FORMAT') 'Key rejects shell injection and newlines'
+    Assert-Test ((Error-Code '/api/model/key' @{installDir=$env:WINDIR;apiKey=$keyBody.apiKey}) -eq 'MODEL_KEY_PATH_INVALID') 'Key updates refuse system directories'
+    Assert-Test ((Error-Code '/api/model/key' @{installDir=(Join-Path $sandbox 'not-installed');apiKey=$keyBody.apiKey}) -eq 'MODEL_KEY_INSTALLATION_MISSING') 'Key cannot be saved before an installation exists'
+    $testConfig.models.providers.deepseek.baseUrl='https://example.com'
+    $testConfig | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $configPath
+    Assert-Test ((Error-Code '/api/model/key' $keyBody) -eq 'MODEL_KEY_PROVIDER_UNSUPPORTED') 'Key updates cannot target a custom provider'
     $failure=Api '/api/deploy' @{packageId=$upload.packageId;installDir=(Join-Path $sandbox 'failure');port=(Free-Port);apiKey='';includeBusiness=$false}
     $runtimeItems.Add(('jobs\' + $failure.jobId))
     for($i=0;$i -lt 80;$i++){ $state=Api '/api/deploy/status' @{};if($state.status -ne 'running'){break};Start-Sleep -Milliseconds 150 }

@@ -7,7 +7,7 @@ const groups = [
     ['system', 'Windows 系统', '检查 64 位系统与处理器架构。'],
     ['disk', '安装盘可用空间', '建议预留 20 GB，低于 8 GB 将提示处理。'],
     ['powershell', 'PowerShell 7', '确认默认已安装的 PowerShell 7 可以正常运行。'],
-    ['node', 'Node.js 运行环境', '检查 Node.js 版本是否达到 24.16.0。'],
+    ['node', 'Node.js 运行环境', '检查 ≥ 24.16.0；缺失或过旧时自动通过 winget 安装。'],
     ['npm', 'npm 包管理器', '实际执行 npm，确认依赖安装工具可用。'],
   ] },
   { title: '网络与程序安装', description: '确认依赖能下载、程序已就位', items: [
@@ -38,6 +38,9 @@ const results = new Map();
 const manualResults = new Set();
 let running = false;
 let deploymentBusy = false;
+let nodeSetupBusy = false;
+let modelKeyBusy = false;
+let nodeSetupAttempted = false;
 let stopRequested = false;
 let lastRun = null;
 let toastTimer;
@@ -53,9 +56,15 @@ const messages = {
   PWSH_MISSING: ['未找到 PowerShell 7。', '安装 Microsoft PowerShell 7 后，关闭并重新启动本检测台。', 'winget install --id Microsoft.PowerShell --exact'],
   PWSH_OLD: ['PowerShell 版本不满足要求。', '请升级到 PowerShell 7。'],
   PWSH_OK: ['PowerShell 7 可以正常执行。'],
-  NODE_MISSING: ['未找到 Node.js。', '安装 Node.js 24.16.0 或以上版本。安装后重新启动检测台，刷新环境变量。', 'winget install --id OpenJS.NodeJS --exact'],
-  NODE_OLD: ['Node.js 版本低于 24.16.0。', '请安装符合要求的版本，再重新启动检测台。', 'winget upgrade --id OpenJS.NodeJS --exact'],
+  NODE_MISSING: ['未找到 Node.js。', '自检会自动尝试安装 Node.js LTS；若失败，可手动执行下面命令后重试。', 'winget install --id OpenJS.NodeJS.LTS --exact --source winget'],
+  NODE_OLD: ['Node.js 版本低于 24.16.0。', '自检会自动尝试安装符合要求的 LTS 版本；若失败，可手动执行下面命令后重试。', 'winget install --id OpenJS.NodeJS.LTS --exact --source winget --force'],
   NODE_OK: ['Node.js 版本符合要求。'],
+  NODE_SETUP_FAILED: ['Node.js 自动安装失败。', '展开环境安装日志，检查网络和权限后重试。'],
+  NODE_SETUP_TIMEOUT: ['Node.js 安装超过 15 分钟。', '检查网络和安装日志，确认旧任务已结束后重试。'],
+  NODE_SETUP_VERIFY_FAILED: ['安装结束后 Node.js 或 npm 仍未通过验证。', '检查 PATH 中是否存在旧版本，必要时重启电脑后重试。'],
+  NODE_WINGET_MISSING: ['未找到 winget，无法自动安装 Node.js。', '从微软商店安装或更新“应用安装程序”，或到 nodejs.org 安装 Node.js LTS（包含 npm）。'],
+  NODE_SETUP_BUSY: ['其他检查台正在安装 Node.js。', '等待已有任务结束，再重试检查。'],
+  NODE_SETUP_DEPLOY_BUSY: ['OpenClaw 正在安装，暂不能更改 Node.js。', '等待当前部署结束后重试。'],
   NPM_MISSING: ['Node.js 的 npm 组件不完整。', '修复或重新安装官方 Node.js（包含 npm），然后重新启动检测台。'],
   NPM_OK: ['npm 已实际执行并返回版本。'],
   NPM_NETWORK_FAILED: ['OpenClaw 下载源暂不可用。', '检查网络、代理和企业网络限制，然后重试。'],
@@ -199,7 +208,7 @@ function updateRow(id, result) {
         catch { toast('复制失败，请选中命令后手动复制'); }
       });
       commandRow.append(make('code', '', command), copy);
-      detail.append(commandRow, make('p', '', '检测台只提供处理方法，不会自动执行安装、重启或修改配置。'));
+      detail.append(commandRow, make('p', '', 'Node.js/npm 缺失或过旧时，自检会自动尝试安装；其他命令需手动执行。'));
     }
     if (result.data?.url) {
       const link = make('a', 'button secondary', '打开 OpenClaw ↗');
@@ -239,7 +248,7 @@ function updateSummary() {
   manual.forEach((item) => {
     const enabled = item.requires.every((id) => ['pass', 'warn'].includes(results.get(id)?.status));
     const checkbox = $(`#manual-${item.id}`);
-    checkbox.disabled = running || !enabled;
+    checkbox.disabled = running || nodeSetupBusy || deploymentBusy || modelKeyBusy || !enabled;
     checkbox.title = enabled ? '完成实际操作后再勾选' : '先完成相关自动检查并处理失败项';
     if (!enabled && manualResults.has(item.id)) {
       manualResults.delete(item.id);
@@ -249,10 +258,11 @@ function updateSummary() {
     }
   });
   $('#export-report').disabled = !complete;
-  document.querySelectorAll('[data-action=retry]').forEach((button) => { button.disabled = running || deploymentBusy; });
-  $('#install-dir').disabled = running || deploymentBusy;
-  $('#run-all').disabled = deploymentBusy;
+  document.querySelectorAll('[data-action=retry]').forEach((button) => { button.disabled = running || deploymentBusy || nodeSetupBusy || modelKeyBusy; });
+  $('#install-dir').disabled = running || deploymentBusy || nodeSetupBusy || modelKeyBusy;
+  $('#run-all').disabled = deploymentBusy || modelKeyBusy || (nodeSetupBusy && !running);
   if (typeof syncDeploymentControls === 'function') syncDeploymentControls();
+  if (typeof syncModelKeyControls === 'function') syncModelKeyControls();
   $('#run-all').innerHTML = running ? '<span>◷</span> 完成本项后暂停' : '<span>▷</span> ' + (complete ? '重新全面自检' : '开始全面自检');
 }
 
@@ -278,6 +288,18 @@ async function check(id) {
     if (!response.ok) throw new Error('HELPER_OFFLINE');
     result = await response.json();
     if (!['pass', 'fail', 'warn'].includes(result.status)) throw new Error('HELPER_OFFLINE');
+    clearTimeout(timer);
+    if (['node', 'npm'].includes(id) && result.status === 'fail' && !nodeSetupAttempted && ['NODE_MISSING','NODE_OLD','NPM_MISSING','COMMAND_FAILED','COMMAND_TIMEOUT','CHECK_ERROR'].includes(result.code)) {
+      nodeSetupAttempted = true;
+      const state = await ensureNodeSetup();
+      if (state.status === 'succeeded') {
+        for (const runtimeId of ['node', 'npm']) {
+          const verified = await readRuntimeCheck(runtimeId);
+          results.set(runtimeId, verified); updateRow(runtimeId, verified);
+          if (runtimeId === id) result = verified;
+        }
+      } else result = { status:'fail', code:state.code || 'NODE_SETUP_FAILED', detail:state.message, checkedAt:new Date().toISOString() };
+    }
     $('#connection').classList.remove('offline');
     $('#connection').innerHTML = '<i></i> 本地检测程序已连接';
   } catch (error) {
@@ -300,20 +322,21 @@ function resetManual() {
   });
 }
 async function runAll() {
-  if (deploymentBusy) return;
+  if (deploymentBusy || modelKeyBusy) return;
   if (running) {
     stopRequested = true;
     notice('已请求暂停。当前检查结束后暂停，其余项目保留为等待检查。');
     return;
   }
+  if (nodeSetupBusy) return;
   if (!validPath()) return;
-  running = true; stopRequested = false; results.clear(); resetManual();
+  running = true; stopRequested = false; nodeSetupAttempted = false; results.clear(); resetManual();
   items.forEach(([id]) => {
     updateRow(id, { status: 'pending' });
     $(`#detail-${id}`).classList.add('hidden');
     $(`#check-${id} [data-action=detail]`).setAttribute('aria-expanded', 'false');
   });
-  notice('正在逐项读取当前电脑状态。网络检查每项最多约 8 秒，单项失败不会中断其他检查。');
+  notice('正在逐项检查。Node.js/npm 缺失、过旧或无法运行时会自动尝试安装；若弹出系统授权窗口，请允许安装。单项失败后会继续排查。');
   updateSummary();
   try {
     for (const [id] of items) {
@@ -332,8 +355,9 @@ async function runAll() {
   }
 }
 async function runSingle(id) {
-  if (running || deploymentBusy || !validPath()) return;
+  if (running || deploymentBusy || nodeSetupBusy || modelKeyBusy || !validPath()) return;
   running = true;
+  nodeSetupAttempted = false;
   // A changed prerequisite invalidates its prior manual acceptance.
   manual.filter((item) => item.requires.includes(id)).forEach((item) => {
     manualResults.delete(item.id);

@@ -167,6 +167,7 @@ function Get-DeploymentStatus {
 }
 
 function Start-Deployment($Body) {
+    if ((Get-Command Get-NodeSetupStatus -ErrorAction SilentlyContinue) -and (Get-NodeSetupStatus).status -eq 'running') { throw 'NODE_SETUP_BUSY' }
     $current = Get-DeploymentStatus
     if ($current.status -eq 'running') { throw 'DEPLOY_BUSY' }
     if (-not $script:uploads.ContainsKey([string]$Body.packageId)) { throw 'PACKAGE_NOT_FOUND' }

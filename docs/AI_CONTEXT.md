@@ -16,6 +16,8 @@ Windows 上用 PowerShell 7 启动的本地 H5 工具。检查已安装环境，
    - 上传/部署界面和轮询：`deployment-check/public/deploy.js`。
    - ZIP 信任和路径校验：`deployment-check/deployment.ps1`。
    - 子进程安装：`deployment-check/deploy-worker.ps1`。
+   - Node/npm 自动安装与验证：`deployment-check/node-setup.ps1`、`public/node-setup.js`。
+   - 已安装后补填 SK：`deployment-check/model-key.ps1`、`public/model-key.js`。
    - 真正安装行为：`packages/windows/install.ps1`。
    - 助手业务行为：`packages/windows/preload/workspace/AGENTS.md` 与 `SOUL.md`。
    - 场景规则/模板：`packages/windows/preload/skills/<skill>/`。
@@ -35,6 +37,10 @@ start.cmd → pwsh server.ps1 → 本机浏览器
 ```
 
 所有 POST 需本次服务会话的 `X-Check-Token`，允许本机同源；Host/Origin 校验、ZIP 16 MB/展开 64 MB 上限、路径穿越/重复路径/符号链接/未知安装器拦截。UI 失败项显示红色。
+
+点击全面或 Node/npm 单项自检时，运行环境缺失、过旧或无法执行会自动触发 `POST /api/node/setup`，固定通过 winget 安装 `OpenJS.NodeJS.LTS`，`POST /api/node/status` 查询日志与状态。15 分钟超时，退出成功后还须实际验证 Node/npm；安装期间禁止程序部署。缺少 winget 需人工安装。任务仅保存在当前服务进程内，不要在安装进行中重启检查台。
+
+`POST /api/model/key` 接受已有安装目录和 sk- 密钥；严格格式、路径和官方提供商校验，备份后更新启动脚本中的环境变量，响应不含密钥。直接配置的 apiKey 覆盖环境变量时会拒绝保存并提示处理。保存后页面清空输入框、废止旧对话验收结果并验证官方模型目录；网关仍需人工停止再启动，Gateway token 不变。
 
 请求 JSON 是 UTF-8，ZIP 是二进制；HTTP 解析器按 Content-Length 读取字节，不使用字符数读取二进制。安装器用独立进程运行，状态请求不会等整个 npm 安装。
 

@@ -16,11 +16,12 @@ const deploymentErrors = {
   DEPLOY_PORT_INVALID: '网关端口必须在 1024～65535 之间，并且不能与本检测台相同。',
   DEPLOY_PORT_BUSY: '网关端口已被占用。请更换端口，或先处理正在运行的旧网关。',
   DEPLOY_BUSY: '已有部署任务正在运行，请等待当前任务结束。',
+  NODE_SETUP_BUSY: 'Node.js 环境正在安装，请等待安装和验证完成后再部署。',
   PACKAGE_NOT_FOUND: '安装包会话已失效，请重新选择 ZIP。',
   PACKAGE_SOURCE_MISSING: '仓库内的轻量版文件不完整，请重新下载完整仓库并解压后启动。',
   MODEL_KEY_FORMAT: 'DeepSeek Key 格式不正确。请核对，或留空后续配置。',
-  NODE_MISSING: '还没有安装 Node.js。请先安装 Node.js ≥ 24.16.0，再重新启动检查台。',
-  NODE_OLD: 'Node.js 版本过低，请升级到 ≥ 24.16.0 后重新启动检查台。',
+  NODE_MISSING: '还没有安装 Node.js。请先点击全面自检，检查台会自动尝试安装。',
+  NODE_OLD: 'Node.js 版本过低，请先点击全面自检，检查台会自动尝试升级。',
   NPM_MISSING: 'npm 不完整，请修复系统 Node.js 安装。',
   COMMAND_FAILED: 'Node.js 或 npm 无法正常执行，请先修复运行环境。',
   DEPLOY_GATEWAY_NOT_READY: '安装脚本已结束，但网关仍未响应。请检查日志；本次部署未计为成功。',
@@ -42,7 +43,7 @@ async function deployApi(path, body, binary = false) {
   } finally { clearTimeout(timer); }
 }
 function syncDeploymentControls() {
-  const busy = running || deploymentBusy || uploadingPackage;
+  const busy = running || deploymentBusy || uploadingPackage || nodeSetupBusy || modelKeyBusy;
   $('#package-file').disabled = busy;
   $('#use-bundled').disabled = busy;
   $('#deploy-key').disabled = busy;
@@ -51,7 +52,7 @@ function syncDeploymentControls() {
   $('#deploy-button').disabled = busy || !selectedPackage;
 }
 async function useBundledPackage() {
-  if (running || deploymentBusy || uploadingPackage) return;
+  if (running || deploymentBusy || uploadingPackage || nodeSetupBusy || modelKeyBusy) return;
   selectedPackage = null;
   uploadingPackage = true;
   syncDeploymentControls();
@@ -140,7 +141,7 @@ async function pollDeployment(initial = false) {
   }
 }
 $('#deploy-button').addEventListener('click', async () => {
-  if (!selectedPackage || running || deploymentBusy || !validPath()) return;
+  if (!selectedPackage || running || deploymentBusy || nodeSetupBusy || modelKeyBusy || !validPath()) return;
   deploymentBusy = true; updateSummary();
   $('#deploy-status').className = 'deploy-status';
   $('#deploy-message').textContent = '正在检查目标目录并解压安装包…';

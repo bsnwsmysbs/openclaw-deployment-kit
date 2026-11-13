@@ -4,7 +4,7 @@
 
 1. 准备 PowerShell 7：尚未安装时先双击 `deployment-check/public/powershell7.html` 查看独立指南。在系统终端运行 `winget install --id Microsoft.PowerShell --exact --source winget`；安装后重新打开终端，执行 `pwsh --version` 确认 7.x。没有 winget 可按指南中的微软官方链接安装 x64 MSI。
 2. 获取公开仓库或完整仓库 ZIP，双击 `deployment-check/start.cmd`。
-3. 填写新安装目录，运行自检。缺 Node 时安装系统 Node >= 24.16.0，确保 npm 可用，再关闭并重新启动检查台。
+3. 填写新安装目录，运行自检。Node/npm 缺失、过旧或无法运行时，检查台自动通过 winget 安装 Node.js LTS；按系统授权提示允许安装，等待日志和实际验证结果。没有 winget 时按失败提示手动安装。检查台会重新读取 PATH，通常无需重启。
 4. 网页会自动读取完整仓库内 `packages/windows/` 的 Windows Lite 0.3.0，无需打包或下载第二份 ZIP。
 5. 填写可选 API Key，选择网关端口和是否安装业务场景，点击“安装仓库自带轻量版”。
 6. 等待依赖下载、脚本安装和网关验证。失败显示红色，展开日志查看原因；成功后自动全面自检。
@@ -19,7 +19,8 @@
 - 端口占用：修改网页端口，或核实正在运行的已有 Gateway。不要无差别结束 Node 进程。
 - npm 下载失败：检查镜像、网络、代理和 DNS。脚本日志中的最后一个阶段可用于定位。
 - 网关启动失败：查看安装任务日志及目标目录日志；安装脚本退出不代表页面已可访问。
-- 密钥/模型失败：新装 Key 可留空，随后运行目标目录 `tools/set-deepseek-key.ps1`；用自检确认模型名称是否仍可用。
+- 密钥/模型失败：新装 Key 可留空，随后在网页“补填／修改 SK 密钥”保存并检查。已运行的网关需先运行目标目录 `stop-gateway.cmd`，再运行 `start-gateway.cmd`，再实际对话验证；网关令牌不会改变。
+- Node 自动安装失败：展开环境安装日志，检查网络、winget 和系统授权。安装退出成功但 Node/npm 验证失败仍显示红色，需处理 PATH 或旧版本冲突后重试。
 - 检查台断开：部署任务可能仍在后台运行。刷新页面重新查询；若重启了检查台，应先核对旧进程与任务日志，不要直接重复提交。
 
 ZIP 解压和日志保留在 `%LOCALAPPDATA%\OpenClawDeploymentKit`。失败安装保留已写入的目录，不自动递归删除。

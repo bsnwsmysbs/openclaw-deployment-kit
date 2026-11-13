@@ -27,7 +27,7 @@ try {
     $token = [regex]::Match($page.Content, 'name="check-session" content="([a-f0-9]+)"').Groups[1].Value
     Assert-Check ($token.Length -eq 64) 'Page receives per-run API session'
     Assert-Check (($page.Headers['Content-Security-Policy'] -join '') -match "frame-ancestors 'none'") 'Page refuses framing'
-    foreach ($asset in @('app.js','style.css')) {
+    foreach ($asset in @('app.js','node-setup.js','model-key.js','style.css')) {
         $assetResponse = Invoke-WebRequest "$url/$asset" -TimeoutSec 3
         Assert-Check ($assetResponse.StatusCode -eq 200) "Static asset: $asset"
     }
@@ -36,6 +36,10 @@ try {
     Assert-Check ($denied.StatusCode -eq 403) 'API rejects missing session token'
     $denied = Invoke-WebRequest "$url/api/check" -Method Post -Body $body -ContentType 'application/json' -Headers @{'X-Check-Token'=$token; Origin='https://example.com'} -SkipHttpErrorCheck
     Assert-Check ($denied.StatusCode -eq 403) 'API rejects foreign Origin'
+    foreach ($protectedRoute in @('/api/node/setup','/api/node/status','/api/model/key')) {
+        $denied=Invoke-WebRequest ($url+$protectedRoute) -Method Post -Body '{}' -ContentType 'application/json' -SkipHttpErrorCheck
+        Assert-Check ($denied.StatusCode -eq 403) "Installation/key route requires session: $protectedRoute"
+    }
     $denied = Invoke-WebRequest "$url/server.ps1" -SkipHttpErrorCheck
     Assert-Check ($denied.StatusCode -eq 404) 'Server source is not public'
     function Invoke-Check([string]$Id, [string]$Directory = $fixtureRoot) {
