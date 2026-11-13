@@ -1,0 +1,74 @@
+[
+  {
+    "name": "政策源每日监测",
+    "description": "默认禁用。启用前需确认政策来源、输出目录和人工复核人。",
+    "cron": "0 9 * * *",
+    "tz": "Asia/Shanghai",
+    "session": "isolated",
+    "disabled": true,
+    "message": "使用 policy-briefing Skill 生成政策源每日监测草稿。仅收集公开政策更新、来源链接和摘要，不发送正式通知；如来源目录、输出目录或复核人未配置，请只输出待配置清单。"
+  },
+  {
+    "name": "政策周报生成",
+    "description": "默认禁用。启用前需确认周报频率、来源范围、输出模板和复核人。",
+    "cron": "30 9 * * 1",
+    "tz": "Asia/Shanghai",
+    "session": "isolated",
+    "disabled": true,
+    "message": "使用 policy-briefing Skill 生成政策周报草稿、来源链接清单和领导阅读版。不得自动对外发送，所有结论进入人工复核。"
+  },
+  {
+    "name": "会议督办周报",
+    "description": "默认禁用。启用前需确认会议督办资料入口、台账口径和复核人。",
+    "cron": "30 16 * * 5",
+    "tz": "Asia/Shanghai",
+    "session": "isolated",
+    "disabled": true,
+    "message": "使用 meeting-supervision-closure Skill 汇总会议督办周报草稿，包括完成率、逾期事项、材料不足事项和人工复核清单。不得替代最终验收或问责结论。"
+  },
+  {
+    "name": "合同风险月度抽检",
+    "description": "默认禁用。启用前需确认合同目录、抽检范围、风险规则和法务复核人。",
+    "cron": "30 10 3 * *",
+    "tz": "Asia/Shanghai",
+    "session": "isolated",
+    "disabled": true,
+    "message": "使用 contract-risk-review Skill 生成合同风险月度抽检草稿，包括高风险条款、依据索引、修改建议和需法务复核清单。不输出最终法律意见。"
+  },
+  {
+    "name": "人力绩效部门级月报",
+    "description": "默认禁用。启用前需确认授权数据来源、统计口径、隐私边界和复核人。",
+    "cron": "30 9 5 * *",
+    "tz": "Asia/Shanghai",
+    "session": "isolated",
+    "disabled": true,
+    "message": "使用 hr-performance-analysis Skill 生成部门级月度绩效分析草稿，包括趋势、异常波动和管理参考。不做人事处罚建议或未经授权的个人定性结论。"
+  },
+  {
+    "name": "战略执行月度汇总",
+    "description": "默认禁用。启用前需确认战略目标表、月度任务表、输出口径和复核人。",
+    "cron": "30 9 1 * *",
+    "tz": "Asia/Shanghai",
+    "session": "isolated",
+    "disabled": true,
+    "message": "使用 strategy-execution-review Skill 生成战略执行月度汇总草稿，包括指标进度、偏差预警、责任单位清单和需人工确认事项。不生成最终官方评分。"
+  },
+  {
+    "name": "员工行为合规月度提示",
+    "description": "默认禁用。启用前需确认授权数据边界、分析范围、隐私规则和复核人。",
+    "cron": "0 10 6 * *",
+    "tz": "Asia/Shanghai",
+    "session": "isolated",
+    "disabled": true,
+    "message": "使用 employee-behavior-analysis Skill 生成员工行为合规月度提示草稿，只输出趋势、流程异常和合规风险提醒。不做人格判断、监控结论、处罚建议或最终人事处理。"
+  },
+  {
+    "name": "管理优化量化月报",
+    "description": "默认禁用。启用前需确认可引用输入报告、指标口径、展示范围和管理复核人。",
+    "cron": "0 15 8 * *",
+    "tz": "Asia/Shanghai",
+    "session": "isolated",
+    "disabled": true,
+    "message": "使用 management-optimization-quantification Skill 汇总会议督办、HR绩效、战略执行、政策、合同和行为分析输出，生成管理优化量化月报草稿。不得虚构指标，不自动发布外部材料。"
+  }
+]

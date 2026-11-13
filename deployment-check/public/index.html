@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="check-session" content="__CHECK_SESSION__">
+  <title>OpenClaw · 部署检查台</title>
+  <link rel="stylesheet" href="/style.css">
+  <script src="/app.js" defer></script>
+  <script src="/deploy.js" defer></script>
+</head>
+<body>
+  <aside class="sidebar">
+    <a class="brand" href="/" aria-label="部署检查台首页"><span class="brand-icon">C<span>·</span></span><span>OpenClaw<small>本机部署检查台</small></span></a>
+    <div class="nav-label">部署工作台</div>
+    <a class="nav-item selected" href="#overview"><span>◫</span> 安装自检 <span class="nav-dot"></span></a>
+    <a class="nav-item" href="#checklist"><span>☷</span> 检查清单</a>
+    <a class="nav-item" href="#deployment"><span>↥</span> ZIP 一键部署</a>
+    <button class="nav-item" id="sidebar-report"><span>↧</span> 导出检查报告</button>
+    <div class="sidebar-bottom"><span class="local-dot"></span> 仅在当前电脑运行<p>从环境准备到使用验收，<br>每一步都有据可查。</p><div class="sidebar-version">WINDOWS · LOCAL CHECK</div></div>
+  </aside>
+  <main>
+    <header class="topbar"><div>工作台 <span>/</span> <strong>安装自检</strong></div><span class="connection" id="connection"><i></i> 本地检测程序已连接</span></header>
+    <div class="content">
+      <section class="page-heading" id="overview"><div><div class="eyebrow">DEPLOYMENT CHECK</div><h1>让每一步安装，都心中有数<span>。</span></h1><p>逐项检查当前电脑的部署情况，找到问题，再继续下一步。</p></div><div class="os-tag"><span>⊞</span> Windows 本机</div></section>
+      <section class="overview-grid" aria-label="检查概览">
+        <div class="progress-card"><div class="card-top"><span>整体部署进度</span><span class="badge neutral" id="overall-status">尚未检查</span></div><div class="progress-number"><strong id="pass-count">0</strong><span>/ <span id="total-count">0</span> 项通过</span><span class="percent" id="progress-percent">0%</span></div><div class="progress-track"><div id="progress-fill"></div></div><p id="progress-note">准备好后，点击「开始全面自检」。</p></div>
+        <div class="stat-card"><span class="stat-icon success">✓</span><div><strong id="success-count">0</strong><span>检查通过</span></div></div>
+        <div class="stat-card"><span class="stat-icon danger">!</span><div><strong id="fail-count">0</strong><span>需要处理</span></div></div>
+        <div class="stat-card"><span class="stat-icon amber">◷</span><div><strong id="review-count">0</strong><span>待确认 / 验收</span></div></div>
+      </section>
+      <section class="setup-card" aria-label="检测设置"><div class="path-field"><label for="install-dir">OpenClaw 安装目录 <span>检查与部署使用同一目录</span></label><div class="input-wrap"><span>▱</span><input id="install-dir" value="D:\OpenClawMeeting" spellcheck="false" autocomplete="off" aria-describedby="path-note"></div><small id="path-note">没有 D 盘？可改成 C:\OpenClawMeeting。默认已具备 PowerShell 7。</small></div><div class="setup-actions"><button class="button primary" id="run-all"><span>▷</span> 开始全面自检</button><button class="button secondary" id="export-report" disabled>↧ 导出报告</button></div></section>
+      <div class="notice hidden" id="run-notice" role="status" aria-live="polite"></div>
+      <section class="deployment-card" id="deployment" aria-label="ZIP 一键部署">
+        <div class="deployment-heading"><div><div class="eyebrow">INSTALL FROM ZIP</div><h2>从安装包，一步部署到这台电脑</h2><p>选择 Windows Lite ZIP，自动解压、安装依赖、配置业务能力并启动网关。</p></div><span class="badge neutral" id="deploy-badge">等待安装包</span></div>
+        <div class="deploy-layout"><div class="upload-zone"><label for="package-file"><span class="upload-icon">↥</span><strong>选择 ZIP 安装包</strong><span>支持本项目生成的 Windows 包及已登记旧版包 · 最大 16 MB</span></label><input id="package-file" type="file" accept=".zip,application/zip"><p id="package-info">安装包仅传到当前电脑，不上传到云端。</p></div>
+        <div class="deploy-fields"><label for="deploy-key">DeepSeek API Key <span>选填，可安装后设置</span></label><input id="deploy-key" type="password" autocomplete="off" placeholder="sk-…"><div class="deploy-options"><div><label for="deploy-port">网关端口</label><input id="deploy-port" type="number" min="1024" max="65535" value="18789"></div><label class="business-choice"><input id="deploy-business" type="checkbox" checked> 安装七大业务场景</label></div><button class="button primary" id="deploy-button" disabled>↥ 解压并一键部署</button></div></div>
+        <p class="deploy-scope">部署到上方填写的新目录；已有内容时会阻止安装。将创建桌面工作台并开启当前用户登录自启。需预先安装 Node.js ≥ 24.16.0，安装时联网下载 OpenClaw。</p>
+        <div class="deploy-status hidden" id="deploy-status" role="status" aria-live="polite"><strong id="deploy-message"></strong><div class="progress-track"><div id="deploy-progress"></div></div><span id="deploy-stage"></span><details id="deploy-log-details"><summary>查看安装日志</summary><pre id="deploy-log"></pre></details></div>
+      </section>
+      <section id="checklist"><div class="section-heading"><h2>部署检查清单 <span id="check-count"></span></h2><div class="legend"><span><i class="green"></i>通过</span><span><i class="red"></i>失败</span><span><i class="yellow"></i>待确认</span></div></div><div id="groups"></div></section>
+      <section class="acceptance-card"><div class="acceptance-icon">↗</div><div><h3>最后，用一份真实资料走完整个流程</h3><p>自动检查验证环境与配置。实际对话、报告导出和重启后的自启动，需要完成下面的使用验收。</p><div id="manual-checks"></div></div></section>
+      <footer><span>OpenClaw 部署检查台</span><span id="last-run">检查结果仅代表当前检测时间的状态</span></footer>
+    </div>
+    <div class="toast hidden" id="toast" role="status"></div>
+  </main>
+</body>
+</html>

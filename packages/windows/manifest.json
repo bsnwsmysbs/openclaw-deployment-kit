@@ -1,0 +1,98 @@
+{
+  "name": "OpenClawMeeting-Setup-Lite",
+  "version": "0.3.0",
+  "buildDate": "2026-11-13",
+  "openclawVersion": "2026.6.1",
+  "nodeVersion": "24.16.0",
+  "description": "Lite installer package for OpenClaw Gateway local deployment. System Node.js/npm is required and private Node.js runtime download is disabled.",
+  "includes": [
+    "install/start/stop/verify scripts",
+    "configuration templates",
+    "optional 7 preloaded OpenClaw business skills",
+    "optional disabled automation task templates",
+    "basic-only install mode without business skills or business SOUL",
+    "business cron cleanup when installing basic-only mode",
+    "auto-update disabled by config and gateway environment",
+    "system Node.js/npm required; private Node.js runtime disabled",
+    "npm internal file validation before accepting Node.js runtime",
+    "Node.js/npm runtime repair tool for existing installations",
+    "WeCom channel configuration tool with wecom_mcp allowlist and channel startup guard",
+    "current-user logon auto-start for local gateway",
+    "preloaded business or basic workspace SOUL.md and AGENTS.md",
+    "function list guidance with Chinese desktop workbench folders",
+    "shared source index for non-contract materials",
+    "WPS-ready deliverable rules without user-facing Markdown outputs",
+    "fixed DOCX export tool without Microsoft Word dependency",
+    "gateway self-restart prevention rules",
+    "DeepSeek static model list with flash, pro, chat, and reasoner",
+    "noninteractive deployment support with bound parameters",
+    "random per-install Gateway token",
+    "workspace-local business skill installation"
+  ],
+  "downloadsAtInstallTime": [
+    "openclaw@2026.6.1 npm package"
+  ],
+  "excludes": [
+    "bundled Node.js runtime",
+    "bundled node_modules",
+    "API keys",
+    "meeting videos",
+    "audio files",
+    "transcripts",
+    "OCR frames",
+    "workspace data",
+    "logs",
+    "state",
+    "enabled scheduled jobs",
+    "Gateway tokens"
+  ],
+  "toolPackage": {
+    "source": "tools",
+    "installTarget": "tools",
+    "files": [
+      "export-docx.ps1",
+      "set-deepseek-key.ps1",
+      "set-wecom-config.ps1",
+      "repair-node-npm-runtime.ps1",
+      "clear-business-cron-jobs.ps1",
+      "README-DOCX工具.md",
+      "mount-workspace.ps1"
+    ],
+    "docxExport": {
+      "tool": "tools/export-docx.ps1",
+      "requiresMicrosoftWord": false,
+      "input": "internal text draft",
+      "output": ".docx"
+    }
+  },
+  "updatePolicy": {
+    "pinnedOpenClawVersion": "2026.6.1",
+    "autoUpdate": false,
+    "checkOnStart": false,
+    "gatewayEnv": {
+      "OPENCLAW_NO_AUTO_UPDATE": "1"
+    }
+  },
+  "autoStart": {
+    "mode": "current-user-logon",
+    "service": false,
+    "startupEntry": "OpenClawMeeting-Gateway.vbs",
+    "enableScript": "enable-autostart.ps1",
+    "disableScript": "disable-autostart.ps1"
+  },
+  "workspacePreload": {
+    "source": "preload/workspace",
+    "basicSource": "preload/workspace-basic",
+    "files": [
+      "SOUL.md",
+      "AGENTS.md",
+      "WORKSPACE_GUIDE.md",
+      "资料源索引.md"
+    ],
+    "backupExistingFiles": true,
+    "manualMountScript": "tools/mount-workspace.ps1",
+    "desktopWorkbench": "Desktop/龙虾工作台",
+    "caseRoot": "Desktop/龙虾工作台/01-输入资料",
+    "outputRoot": "Desktop/龙虾工作台/02-输出成果"
+  }
+}

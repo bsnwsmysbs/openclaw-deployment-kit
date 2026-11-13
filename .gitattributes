@@ -1,0 +1,15 @@
+* text=auto
+*.ps1 text eol=crlf
+*.cmd text eol=crlf
+*.js text eol=lf
+*.css text eol=lf
+*.html text eol=lf
+*.md text eol=lf
+*.json text eol=lf
+*.template text eol=lf
+*.xlsx binary
+*.docx binary
+*.png binary
+
+# ZIP verification uses exact bytes. Preserve installer source across clone/archive.
+packages/windows/** -text whitespace=cr-at-eol,-blank-at-eof

@@ -1,0 +1,10 @@
+{
+  "legacyPackages": [
+    {
+      "sha256": "7105078e34dba1626076999cfbdf271995a6ff4799e889952903ff1911b0b3a6",
+      "openclawVersion": "2026.6.1",
+      "version": "0.2.13",
+      "name": "OpenClawMeeting Windows Lite 0.2.13"
+    }
+  ]
+}

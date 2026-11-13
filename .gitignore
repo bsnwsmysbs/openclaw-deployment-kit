@@ -1,0 +1,25 @@
+# Local installations, uploaded packages, credentials, and generated artifacts
+dist/
+.local/
+node_modules/
+runtime/
+state/
+logs/
+output/
+backup/
+*.log
+*.zip
+*.zip.bak*
+*.tmp
+.env
+.env.*
+!.env.example
+credentials*.json
+auth-profiles.json
+openclaw-local.cmd
+config/openclaw.json
+.DS_Store
+Thumbs.db
+
+# Existing commercial documents remain local, outside the source repository
+/OpenClaw报价文档.*
