@@ -20,6 +20,8 @@ Windows 本机部署检查台 + 自带最新轻量版一键安装 + 七大企业
 
 前提：Windows x64，已安装 PowerShell 7。检查台本身不依赖 Node.js。
 
+解压完整 ZIP 后，直接双击最外层 **`启动部署检查台.cmd`**。也可双击旁边的 **`创建桌面快捷方式.cmd`**，生成桌面“OpenClaw 部署检查台”入口，方便以后打开安装、自检、SK 补填和 Token 页面。请保留完整解压文件夹；移动文件夹后重新创建快捷方式。快捷方式用于启动检查台，启动窗口关闭后网页服务停止。
+
 首次使用尚未安装 PowerShell 7 时，可直接双击打开 [独立安装指南](deployment-check/public/powershell7.html)，无需启动网页服务。在系统自带的命令提示符或 Windows PowerShell 中执行：
 
 ```powershell

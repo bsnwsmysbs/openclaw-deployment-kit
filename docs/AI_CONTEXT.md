@@ -4,6 +4,8 @@
 
 Windows 上用 PowerShell 7 启动的本地 H5 工具。检查已安装环境，也支持从可信 Windows Lite ZIP 新装 OpenClaw 和七大业务场景。
 
+用户启动入口位于仓库最外层 `启动部署检查台.cmd`，相对路径调用 `deployment-check/start.cmd`。`创建桌面快捷方式.cmd` 调用 `scripts/create-desktop-shortcut.ps1` 创建当前用户桌面入口；不包含安装目录、Token 或 SK。快捷方式绑定当前解压位置，移动仓库后需重建。
+
 默认使用仓库自带的最新轻量版 `packages/windows/`，无需用户准备第二份 ZIP。独立轻量版 ZIP 与 SHA256 发布在 GitHub Releases v0.3.0，与此目录逐文件一致。
 
 ## 阅读顺序

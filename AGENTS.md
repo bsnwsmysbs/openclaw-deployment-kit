@@ -6,7 +6,8 @@
 
 ## 定位与入口
 
-- 启动检查台：`deployment-check/start.cmd`（PowerShell 7 是前提）。
+- 最外层启动入口：`启动部署检查台.cmd`，转发至 `deployment-check/start.cmd`（PowerShell 7 是前提）。
+- 桌面快捷方式：双击最外层 `创建桌面快捷方式.cmd`，调用 `scripts/create-desktop-shortcut.ps1`；链接指向当前解压目录，移动目录后需重新创建。
 - HTTP 检查与静态页面：`deployment-check/server.ps1`。
 - ZIP 校验、路径校验、任务启动与状态：`deployment-check/deployment.ps1`。
 - 独立安装进程：`deployment-check/deploy-worker.ps1`。
