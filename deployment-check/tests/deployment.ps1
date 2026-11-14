@@ -117,6 +117,28 @@ try { while($true){$c=$l.AcceptTcpClient();try{$s=$c.GetStream();$r=[IO.StreamRe
     $configPath=Join-Path $target 'config\openclaw.json'
     $testConfig=@{gateway=@{bind='loopback';port=$gatewayPort;auth=@{token='fixture-only'}};agents=@{defaults=@{model=@{primary='deepseek/deepseek-chat'}}};models=@{providers=@{deepseek=@{baseUrl='https://api.deepseek.com'}}}}
     $testConfig | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $configPath
+    $access=Api '/api/gateway/access' @{installDir=$target}
+    Assert-Test ($access.token -eq 'fixture-only' -and $access.url -eq "http://127.0.0.1:$gatewayPort/#token=fixture-only") 'Dedicated gateway access reads actual token and configured port'
+    Assert-Test (($access | ConvertTo-Json -Depth 5) -notmatch 'providers|apiKey|deepseek') 'Gateway access returns no model credentials or full configuration'
+    $foreign=Invoke-WebRequest "$url/api/gateway/access" -Method Post -Headers @{'X-Check-Token'=$token;Origin='https://example.com'} -ContentType 'application/json' -Body (@{installDir=$target}|ConvertTo-Json) -SkipHttpErrorCheck
+    Assert-Test ($foreign.StatusCode -eq 403) 'Gateway credentials reject foreign Origin even with session token'
+    $response=Invoke-WebRequest "$url/api/gateway/access" -Method Post -Headers @{'X-Check-Token'=$token} -ContentType 'application/json' -Body (@{installDir=$target}|ConvertTo-Json)
+    Assert-Test (($response.Headers['Cache-Control'] -join '') -eq 'no-store') 'Gateway credential response cannot be cached'
+    Assert-Test ((Error-Code '/api/gateway/access' @{installDir=$env:WINDIR}) -eq 'GATEWAY_ACCESS_PATH_INVALID') 'Gateway access refuses protected directories'
+    $testConfig.gateway.bind='lan'
+    $testConfig | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $configPath
+    Assert-Test ((Error-Code '/api/gateway/access' @{installDir=$target}) -eq 'GATEWAY_ACCESS_CONFIG_INVALID') 'Gateway access refuses non-loopback configuration'
+    $testConfig.gateway.bind='loopback';$testConfig.gateway.port=Free-Port
+    $testConfig.gateway.auth.token='fixture&value/#?'
+    $testConfig | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $configPath
+    $access=Api '/api/gateway/access' @{installDir=$target}
+    Assert-Test ($access.url.EndsWith('#token=fixture%26value%2F%23%3F')) 'Gateway token is encoded inside URL fragment'
+    Assert-Test ((Error-Code '/api/gateway/open' @{installDir=$target}) -eq 'GATEWAY_ACCESS_OFFLINE') 'Offline Gateway never launches browser or claims success'
+    $testConfig.gateway.auth.token=''
+    $testConfig | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $configPath
+    Assert-Test ((Error-Code '/api/gateway/access' @{installDir=$target}) -eq 'GATEWAY_ACCESS_TOKEN_MISSING') 'Missing token is reported without generating or changing it'
+    $testConfig.gateway.port=$gatewayPort;$testConfig.gateway.auth.token='fixture-only'
+    $testConfig | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $configPath
     $keyBody=@{installDir=$target;apiKey='sk-FAKE_KEY_FOR_TEST_12345'}
     $saved=Api '/api/model/key' $keyBody
     $wrapperPath=Join-Path $target 'openclaw-local.cmd'

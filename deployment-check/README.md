@@ -56,7 +56,15 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\server.ps1
 
 ## 实现
 
-`server.ps1` 使用 PowerShell 7 和 .NET TCP listener，仅绑定 `127.0.0.1`；静态 H5 页面和检测接口共用一个端口。没有前端构建或依赖安装步骤。检测接口只接受白名单检查 ID 与本地英文 Windows 路径；浏览器请求需要本次启动的会话令牌，并检查 Host/Origin。接口与报告不返回 API Key 或 Gateway token。
+`server.ps1` 使用 PowerShell 7 和 .NET TCP listener，仅绑定 `127.0.0.1`；静态 H5 页面和检测接口共用一个端口。没有前端构建或依赖安装步骤。检测接口只接受白名单检查 ID 与本地英文 Windows 路径；浏览器请求需要本次启动的会话令牌，并检查 Host/Origin。普通诊断和报告不返回 API Key 或 Gateway token；网关访问专用接口按页面需求读取并返回本机 Token，不返回模型密钥。
+
+## 网关 Token 与访问地址
+
+页面自动读取上方安装目录 `config/openclaw.json` 的真实 Token 与端口，支持重新读取、复制 Token 和打开 OpenClaw。Token 明文仅显示在当前本机页面，不写入检查报告、部署状态或日志。切换目录会清空旧 Token；读取不会重新生成或更改 Token。
+
+部署验证成功后自动用系统默认浏览器打开带 `#token=…` 的本机地址，浏览器打开失败会提示手动复制地址和 Token。已有安装不会因刷新检查台反复打开浏览器，可点击“打开 OpenClaw”。打开前必须实际收到 OpenClaw 网关页面响应。
+
+实现位于 `gateway-access.ps1` 和 `public/gateway-access.js`。`POST /api/gateway/access` 读取配置，`POST /api/gateway/open` 检查网关后调用系统浏览器；两者均受会话令牌与 Host/Origin 校验保护，响应禁止缓存，仅允许 loopback 配置。客户端不能指定打开的 URL，服务端根据验证后的配置构造地址。
 
 ```text
 deployment-check/

@@ -263,6 +263,7 @@ function updateSummary() {
   $('#run-all').disabled = deploymentBusy || modelKeyBusy || (nodeSetupBusy && !running);
   if (typeof syncDeploymentControls === 'function') syncDeploymentControls();
   if (typeof syncModelKeyControls === 'function') syncModelKeyControls();
+  if (typeof syncGatewayAccessControls === 'function') syncGatewayAccessControls();
   $('#run-all').innerHTML = running ? '<span>◷</span> 完成本项后暂停' : '<span>▷</span> ' + (complete ? '重新全面自检' : '开始全面自检');
 }
 

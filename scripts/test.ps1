@@ -17,4 +17,5 @@ if (Get-Command node.exe -ErrorAction SilentlyContinue) {
 & (Join-Path $repo 'deployment-check\tests\smoke.ps1')
 & (Join-Path $repo 'deployment-check\tests\deployment.ps1')
 & (Join-Path $repo 'deployment-check\tests\node-setup.ps1')
+& (Join-Path $repo 'deployment-check\tests\gateway-access.ps1')
 Write-Host 'All project checks passed.'

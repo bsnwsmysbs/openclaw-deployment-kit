@@ -247,6 +247,7 @@ function Check([string]$Id, [string]$InstallDir) {
 . (Join-Path $PSScriptRoot 'deployment.ps1')
 . (Join-Path $PSScriptRoot 'node-setup.ps1')
 . (Join-Path $PSScriptRoot 'model-key.ps1')
+. (Join-Path $PSScriptRoot 'gateway-access.ps1')
 
 function Read-HttpRequest($Stream) {
     # Parse headers without buffered text reads, so binary ZIP bodies remain byte-exact.
@@ -335,9 +336,13 @@ try {
                 }
                 $json = $result | ConvertTo-Json -Depth 6 -Compress
                 Send-Response $stream 200 'application/json; charset=utf-8' ($utf8.GetBytes($json))
-            } elseif ($http.method -eq 'POST' -and $path -in @('/api/packages','/api/packages/bundled','/api/deploy','/api/deploy/status','/api/node/setup','/api/node/status','/api/model/key')) {
+            } elseif ($http.method -eq 'POST' -and $path -in @('/api/packages','/api/packages/bundled','/api/deploy','/api/deploy/status','/api/node/setup','/api/node/status','/api/model/key','/api/gateway/access','/api/gateway/open')) {
                 try {
-                    if ($path -eq '/api/model/key') {
+                    if ($path -in @('/api/gateway/access','/api/gateway/open')) {
+                        $body = $utf8.GetString($http.payload) | ConvertFrom-Json
+                        if ($path -eq '/api/gateway/open') { $result = Open-GatewayAccess $body }
+                        else { $result = Get-GatewayAccess $body }
+                    } elseif ($path -eq '/api/model/key') {
                         $body = $utf8.GetString($http.payload) | ConvertFrom-Json
                         $result = Save-ModelKey $body
                     } elseif ($path -eq '/api/node/setup') {
@@ -355,17 +360,17 @@ try {
                     Send-Response $stream 200 'application/json; charset=utf-8' ($utf8.GetBytes(($result | ConvertTo-Json -Depth 8 -Compress)))
                 } catch {
                     $code = [string]$_.Exception.Message
-                    if ($code -notmatch '^(ZIP_|DEPLOY_|PACKAGE_|NODE_|NPM_|MODEL_KEY_)[A-Z_]*$') { $code = 'DEPLOY_REQUEST_FAILED' }
+                    if ($code -notmatch '^(ZIP_|DEPLOY_|PACKAGE_|NODE_|NPM_|MODEL_KEY_|GATEWAY_ACCESS_)[A-Z_]*$') { $code = 'DEPLOY_REQUEST_FAILED' }
                     Send-Response $stream 400 'application/json; charset=utf-8' ($utf8.GetBytes((@{error=$code} | ConvertTo-Json -Compress)))
                 }
-            } elseif ($http.method -eq 'GET' -and $path -in @('/', '/index.html', '/powershell7.html', '/app.js', '/deploy.js', '/node-setup.js', '/model-key.js', '/style.css')) {
+            } elseif ($http.method -eq 'GET' -and $path -in @('/', '/index.html', '/powershell7.html', '/app.js', '/deploy.js', '/node-setup.js', '/model-key.js', '/gateway-access.js', '/style.css')) {
                 if ($path -in @('/', '/index.html')) {
                     $html = [IO.File]::ReadAllText((Join-Path $root 'public\index.html'), $utf8).Replace('__CHECK_SESSION__', $sessionToken)
                     Send-Response $stream 200 'text/html; charset=utf-8' ($utf8.GetBytes($html))
                 } else {
                     $type = 'text/css; charset=utf-8'
                     if ($path -eq '/powershell7.html') { $type = 'text/html; charset=utf-8' }
-                    if ($path -in @('/app.js','/deploy.js','/node-setup.js','/model-key.js')) { $type = 'text/javascript; charset=utf-8' }
+                    if ($path -in @('/app.js','/deploy.js','/node-setup.js','/model-key.js','/gateway-access.js')) { $type = 'text/javascript; charset=utf-8' }
                     Send-Response $stream 200 $type ([IO.File]::ReadAllBytes((Join-Path $root ('public' + $path.Replace('/','\')))))
                 }
             } else { Send-Response $stream 404 'text/plain; charset=utf-8' ($utf8.GetBytes('Not found')) }

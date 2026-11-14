@@ -131,6 +131,7 @@ async function pollDeployment(initial = false) {
     updateSummary();
     if (deploymentBusy) deploymentTimer = setTimeout(() => pollDeployment(), 1500);
     else if (!initial && state.status === 'succeeded') {
+      await refreshGatewayAccess(true);
       toast('部署完成，正在自动运行全面自检');
       await runAll();
     }
@@ -143,6 +144,7 @@ async function pollDeployment(initial = false) {
 $('#deploy-button').addEventListener('click', async () => {
   if (!selectedPackage || running || deploymentBusy || nodeSetupBusy || modelKeyBusy || !validPath()) return;
   deploymentBusy = true; updateSummary();
+  clearGatewayAccess();
   $('#deploy-status').className = 'deploy-status';
   $('#deploy-message').textContent = '正在检查目标目录并解压安装包…';
   try {
@@ -168,5 +170,6 @@ async function initializeDeployment() {
   syncDeploymentControls();
   await useBundledPackage();
   await pollDeployment(true);
+  await refreshGatewayAccess();
 }
-initializeDeployment();
+window.addEventListener('DOMContentLoaded', initializeDeployment, {once:true});

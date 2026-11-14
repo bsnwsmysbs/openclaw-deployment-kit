@@ -56,6 +56,8 @@ pwsh -NoProfile -File .\scripts\build-package.ps1
 
 已安装后补填或更换 DeepSeek Key：在网页“补填／修改 SK 密钥”输入 `sk-…`，点击“保存并检查密钥”。工具会备份旧启动文件，保存后清空输入框并查询官方模型目录。正在运行的网关需先运行安装目录 `stop-gateway.cmd`，再运行 `start-gateway.cmd`，最后实际对话验收。此操作不修改 Gateway token。
 
+网页“网关 Token 与访问地址”会读取安装目录内实际生成的 `gateway.auth.token`，直接显示并支持复制。部署验证成功后自动在系统默认浏览器打开 `http://127.0.0.1:<配置端口>/#token=<Token>`，无需手工找 Token；已有安装可点击“重新读取”或“打开 OpenClaw”。打开前会检查网关响应，失败会提示处理。网关 Token 与 DeepSeek SK 用途不同；Token 仅通过受保护的本机专用接口返回，不写入报告或部署日志。
+
 单独的轻量版 ZIP 发布在 [Releases](https://github.com/bsnwsmysbs/openclaw-deployment-kit/releases/tag/v0.3.0)，解压后运行其中的 `windows/install.cmd`。它和仓库 `packages/windows/` 内容一致，包含安装器和业务资料，不包含网页、Node 或完整运行依赖。使用网页时，直接下载上面的完整仓库包即可。切换其他受支持的包可展开“其他方式：上传轻量版 ZIP”。
 
 一键部署仅安装到新的空目录，不覆盖现有部署。默认安装七大场景、创建“桌面\龙虾工作台”并启用当前用户登录自启。基础版可以取消勾选七大场景；自动检查清单仍以业务增强版为基准，因此基础版 Skill 项会显示失败，需要按交付范围人工判定。

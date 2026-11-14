@@ -10,6 +10,7 @@
   <script src="/node-setup.js" defer></script>
   <script src="/deploy.js" defer></script>
   <script src="/model-key.js" defer></script>
+  <script src="/gateway-access.js" defer></script>
 </head>
 <body>
   <aside class="sidebar">
@@ -20,6 +21,7 @@
     <a class="nav-item" href="#checklist"><span>☷</span> 检查清单</a>
     <a class="nav-item" href="#deployment"><span>↥</span> 轻量版一键部署</a>
     <a class="nav-item" href="#model-key"><span>⚿</span> 补填 SK 密钥</a>
+    <a class="nav-item" href="#gateway-access"><span>↗</span> 网关 Token 与访问</a>
     <button class="nav-item" id="sidebar-report"><span>↧</span> 导出检查报告</button>
     <div class="sidebar-bottom"><span class="local-dot"></span> 仅在当前电脑运行<p>从环境准备到使用验收，<br>每一步都有据可查。</p><div class="sidebar-version">WINDOWS · LOCAL CHECK</div></div>
   </aside>
@@ -53,6 +55,12 @@
         <div class="deploy-status hidden" id="deploy-status" role="status" aria-live="polite"><strong id="deploy-message"></strong><div class="progress-track"><div id="deploy-progress"></div></div><span id="deploy-stage"></span><details id="deploy-log-details"><summary>查看安装日志</summary><pre id="deploy-log"></pre></details></div>
       </section>
       <section class="deployment-card" id="model-key" aria-label="补填或修改 SK 密钥"><div class="deployment-heading"><div><div class="eyebrow">DEEPSEEK · API KEY</div><h2>补填／修改 SK 密钥</h2><p>安装时没填，或需要更换 Key？在这里保存到上方目录的已有安装。保存前会备份旧启动文件，保存后检查密钥和模型。</p></div></div><label class="key-label" for="saved-model-key">DeepSeek SK 密钥</label><div class="key-input-row"><input id="saved-model-key" type="password" autocomplete="new-password" spellcheck="false" placeholder="sk-…"><button class="button primary" id="save-model-key">保存并检查密钥</button></div><p class="deploy-scope">密钥保存在本机启动配置，不回显到网页或报告。若网关正在运行，保存后需先运行安装目录的 stop-gateway.cmd，再运行 start-gateway.cmd，让新密钥生效。</p><p class="key-message" id="model-key-message" role="status" aria-live="polite"></p></section>
+      <section class="deployment-card" id="gateway-access" aria-label="网关 Token 与访问">
+        <div class="deployment-heading"><div><div class="eyebrow">OPENCLAW · GATEWAY</div><h2>网关 Token 与访问地址</h2><p>显示上方安装目录实际生成的网关 Token。部署成功后自动在系统默认浏览器打开 OpenClaw，并携带此 Token。</p></div></div>
+        <label class="key-label" for="gateway-address">OpenClaw 地址</label><div class="key-input-row"><input id="gateway-address" type="text" readonly placeholder="安装完成后显示本机地址"><button class="button primary" id="open-gateway" disabled>打开 OpenClaw ↗</button></div>
+        <label class="key-label gateway-token-label" for="gateway-token">Gateway Token</label><div class="key-input-row"><input id="gateway-token" type="text" readonly autocomplete="off" spellcheck="false" placeholder="安装完成后显示实际生成的 Token"><button class="button secondary" id="copy-gateway-token" disabled>复制 Token</button><button class="button secondary" id="refresh-gateway">重新读取</button></div>
+        <p class="deploy-scope">Token 用于连接本机网关，DeepSeek SK 用于调用模型。此处读取现有配置，不修改 Token；检查报告和部署日志不包含它。</p><p class="key-message" id="gateway-access-message" role="status" aria-live="polite"></p>
+      </section>
       <section id="checklist"><div class="section-heading"><h2>部署检查清单 <span id="check-count"></span></h2><div class="legend"><span><i class="green"></i>通过</span><span><i class="red"></i>失败</span><span><i class="yellow"></i>待确认</span></div></div><div id="groups"></div></section>
       <section class="acceptance-card"><div class="acceptance-icon">↗</div><div><h3>最后，用一份真实资料走完整个流程</h3><p>自动检查验证环境与配置。实际对话、报告导出和重启后的自启动，需要完成下面的使用验收。</p><div id="manual-checks"></div></div></section>
       <footer><span>OpenClaw 部署检查台</span><span id="last-run">检查结果仅代表当前检测时间的状态</span></footer>
