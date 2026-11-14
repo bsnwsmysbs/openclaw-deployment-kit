@@ -3,7 +3,7 @@
 下载入口：[项目代码 ZIP](https://github.com/bsnwsmysbs/openclaw-deployment-kit/archive/refs/heads/main.zip)（公开下载，无需登录） · [PowerShell 7 微软官方下载与安装说明](https://learn.microsoft.com/zh-cn/powershell/scripting/install/installing-powershell-on-windows) · [PowerShell 官方发布页](https://github.com/PowerShell/PowerShell/releases)。手动安装选择稳定版 Windows x64 MSI。
 
 1. 准备 PowerShell 7：尚未安装时先双击 `deployment-check/public/powershell7.html` 查看独立指南。在系统终端运行 `winget install --id Microsoft.PowerShell --exact --source winget`；安装后重新打开终端，执行 `pwsh --version` 确认 7.x。没有 winget 可按指南中的微软官方链接安装 x64 MSI。
-2. 获取公开仓库或完整仓库 ZIP，完整解压后双击最外层 `启动部署检查台.cmd`。可双击旁边的 `创建桌面快捷方式.cmd`，以后从桌面“OpenClaw 部署检查台”进入。保留完整解压文件夹，移动后重新创建快捷方式。
+2. 获取公开仓库或完整仓库 ZIP，完整解压后双击最外层 `启动部署检查台.cmd`。保留完整解压文件夹，需要更换位置时一起移动。
 3. 填写新安装目录，运行自检。Node/npm 缺失、过旧或无法运行时，检查台自动通过 winget 安装 Node.js LTS；按系统授权提示允许安装，等待日志和实际验证结果。没有 winget 时按失败提示手动安装。检查台会重新读取 PATH，通常无需重启。
 4. 网页会自动读取完整仓库内 `packages/windows/` 的 Windows Lite 0.3.0，无需打包或下载第二份 ZIP。
 5. 填写可选 API Key，选择网关端口和是否安装业务场景，点击“安装仓库自带轻量版”。
